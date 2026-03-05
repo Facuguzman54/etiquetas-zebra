@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Generador Zebra - by Facu</title>
+    
+    <link rel="icon" type="image/png" href="https://images.icon-icons.com/1446/PNG/512/22229zebra_98835.png">
+    <link rel="apple-touch-icon" href="https://images.icon-icons.com/1446/PNG/512/22229zebra_98835.png">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Zebra Arcor">
+    <meta name="application-name" content="Zebra Arcor">
+    <meta name="theme-color" content="#0056b3">
+
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Ajuste para que se sienta como App nativa */
+        html, body { 
+            overflow: hidden; 
+            height: 100%; 
+            overscroll-behavior: none; 
+        }
+
+        body { 
+            background-color: #f0f4f8; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; /* Centrado vertical para modo App */
+            padding: 20px; 
+            margin: 0; 
+        }
+
+        .card { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 550px; 
+            border-top: 8px solid #0056b3; 
+        }
+
+        header { text-align: center; margin-bottom: 20px; }
+        .logo-arcor { max-width: 140px; margin-bottom: 10px; }
+        .section { background: #f8f9fa; border: 1px solid #e9ecef; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        .hidden { display: none; }
+        
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; font-size: 0.85rem; }
+        select, input, textarea { width: 100%; padding: 10px; border: 2px solid #eaedf2; border-radius: 8px; margin-bottom: 12px; font-size: 0.95rem; }
+        textarea { height: 80px; resize: none; text-transform: uppercase; font-weight: bold; }
+        
+        .row { display: flex; gap: 10px; }
+        .row div { flex: 1; }
+        
+        .controls-group { display: flex; justify-content: space-around; background: #eef2f7; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: bold; color: #0056b3; font-size: 0.8rem; }
+        .checkbox-item input { width: auto; margin: 0; cursor: pointer; transform: scale(1.2); }
+
+        button { width: 100%; padding: 16px; background: #0056b3; color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #004494; transform: translateY(-2px); }
+        
+        #status { margin-top: 15px; text-align: center; padding: 10px; border-radius: 8px; display: none; font-weight: 600; }
+        footer { margin-top: 20px; color: #888; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <header>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Arcor_textlogo.png" alt="Arcor" class="logo-arcor">
+        <h1 style="font-size: 1.1rem; margin:0;">GENERADOR DE ETIQUETAS ZEBRA</h1>
+    </header>
+
+    <div class="row">
+        <div>
+            <label>IMPRESORA</label>
+            <select id="printerIp">
+                <option value="10.54.204.171">CONSERVAS</option>
+                <option value="10.54.204.152">PASTA</option>
+            </select>
+        </div>
+        <div style="flex: 0.3;">
+            <label>COPIAS</label>
+            <input type="number" id="copias" value="1" min="1" max="10" oninput="validarCopias()">
+        </div>
+    </div>
+
+    <div class="controls-group">
+        <label class="checkbox-item">
+            <input type="checkbox" id="chkEncabezado" onchange="toggleEncabezado()"> ACTIVAR ENCABEZADO
+        </label>
+        <label class="checkbox-item">
+            <input type="checkbox" id="chkInversion"> ALTO CONTRASTE (NEGRO)
+        </label>
+    </div>
+
+    <div id="sectionEncabezado" class="section hidden">
+        <label>LINEA PRODUCTIVA</label>
+        <select id="selectLinea" onchange="cargarProductos()">
+            <option value="">-- Seleccione tipo de producto --</option>
+            <option value="SALSAS">SALSAS Y ADEREZOS</option>
+            <option value="PURE_PULPA">PURE Y PULPA</option>
+            <option value="PASTAS">PASTA</option>
+            <option value="PT">TOMATE (PT)</option>
+            <option value="SE">TOMATE (SE)</option>
+        </select>
+        
+        <label>PRODUCTO</label>
+        <select id="selectProducto">
+            <option value="">Primero elija tipo de producto...</option>
+        </select>
+
+        <label>FECHA</label>
+        <input type="date" id="fechaEtiqueta">
+    </div>
+
+    <label>TEXTO PRINCIPAL (CONTENIDO)</label>
+    <textarea id="textoEtiqueta" placeholder="ESCRIBA EL CONTENIDO..." oninput="validar()"></textarea>
+    <div id="infoExtraGrande" class="hidden" style="color: #ff5252; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; text-align: center;">
+        ⚠ MÁXIMO 15 CARACTERES EN UNA SOLA LÍNEA
+    </div>
+
+    <div class="row">
+        <div>
+            <label>TAMAÑO</label>
+            <select id="tamano" onchange="validar()">
+                <option value="60">Pequeño</option>
+                <option value="100" selected>Mediano</option>
+                <option value="160">Grande</option>
+                <option value="210">Extra Grande (1 Línea)</option>
+            </select>
+        </div>
+        <div>
+            <label>ORIENTACIÓN</label>
+            <select id="orientacion">
+                <option value="V">Vertical</option>
+                <option value="H">Horizontal</option>
+            </select>
+        </div>
+    </div>
+
+    <button onclick="imprimir()">IMPRIMIR ETIQUETA</button>
+    <div id="status"></div>
+</div>
+
+<footer>Hecho por Facu - v3.4 (PWA Mode)</footer>
+
+<script>
+    // Base de datos de productos integrada de tu v3.3
+    const baseDeProductos = {
+        "SALSAS": [
+            {cod: "90101009275", desc: "SALSA POMAROLA LC DP 24X340 G"},
+            {cod: "90101009276", desc: "SALSA PORTUGUESA LC DP 24X340G"},
+            {cod: "90101009278", desc: "SALSA PIZZA LC DP 24 X 340 G"},
+            {cod: "90101009279", desc: "SALSA FILETTO LC DP 24X340 G"},
+            {cod: "90101009339", desc: "SALSA ITALIANA LC DP 24X340 G"},
+            {cod: "90101009459", desc: "SALSA NOEL POMAROLA DP 24X340G"},
+            {cod: "90101009465", desc: "SAL.NOEL PORTUGUESA DP.24X340G"},
+            {cod: "90101009466", desc: "SALSA NOEL FILETTO DP.24X340G"},
+            {cod: "90101009467", desc: "SALSA PIZZA NOEL D.PACK 24X340"},
+            {cod: "90101009558", desc: "SALSA POMAROLA ARCOR DP 24 X 340 G"},
+            {cod: "90101009564", desc: "SAL.PORTUGUESA ARCOR DP.24X340"},
+            {cod: "90101009565", desc: "SALSA FILETTO ARCOR DP.24X340G"},
+            {cod: "90101009566", desc: "SAL.ITALIANA.ARCOR. DP.24X340G"},
+            {cod: "90101009567", desc: "SALSA PIZZA ARCOR DP. 24X340G"},
+            {cod: "90101009569", desc: "SAL.NAPOLITANA ARCOR DP.24X340"},
+            {cod: "90101009694", desc: "SALSA TUCO ARCOR D.PACK 24X340"},
+            {cod: "90101010301", desc: "KETCHUP.DOYP.LA.CAMPAG.24X250G"},
+            {cod: "90101010302", desc: "KETCHUP.PICANTE.DP.LC.24X250G"},
+            {cod: "50309005523", desc: "DOYPACK.KETCHUP.LC.250G.BCO"},
+            {cod: "50300304473", desc: "ARCOR.DOYPACK.PIZZA.24X340G"},
+            {cod: "50300304465", desc: "SALSATI.DOYPACK.FILETTO.24X340"},
+            {cod: "90105041408", desc: "SALSA.TUCO.ARCOR.DP.24X200G"},
+            {cod: "90105040840", desc: "SALSA PIZZA ARCOR DP. 24X200G"},
+            {cod: "90105040841", desc: "SAL.POMAROLA ARCOR DP.24X200G"},
+            {cod: "90101012347", desc: "SALSA.BARBACOA.LC.24X250G"},
+            {cod: "90101012685", desc: "SALSA PIZZA 24X200G ARCOR"},
+            {cod: "90101012684", desc: "SALSA FILETTO 24X200G ARCOR"},
+            {cod: "90101013444", desc: "SALS.ITA.LC.24X340G.DPNF"},
+            {cod: "90101013313", desc: "SALS.POM.ARCOR.24X340.DPNF"},
+            {cod: "90101013314", desc: "SALS.POM.LC.24X340.DPNF"},
+            {cod: "90101013315", desc: "SALS.PIZ.ARCOR.24X340.DPNF"},
+            {cod: "90101013316", desc: "SALS.PIZ.LC.24X340.DPNF"},
+            {cod: "90101013317", desc: "SALS.FILETTO.LC.24X340.DPNF"},
+            {cod: "90101013318", desc: "SALS.FILETTO.ARCOR.24X340.DPNF"},
+            {cod: "90101013449", desc: "SAL.PORT.ARCOR.24X340G.DPNF"},
+            {cod: "90101013450", desc: "SAL.ITA.ARCOR.24X340G.DPNF"},
+            {cod: "90101013451", desc: "SAL.TUCO.ARCOR.24X340G.DPNF"}
+        ],
+        "PURE_PULPA": [
+            {cod: "90101006614", desc: "PURE DE TOMATE ARCOR 12X520 GR"},
+            {cod: "90101001832", desc: "PURE T.SALSATI 12X520 G"},
+            {cod: "50300600260", desc: "PUR.TOM.TETRA.12X520.BLANCO"},
+            {cod: "50300600236", desc: "PURE.TOM.TETRA.12X520.BLANCO"},
+            {cod: "90101000299", desc: "PURE DE TOMATE LC 12X520 GR"},
+            {cod: "50300602316", desc: "PURE.TOMATE.12X520.LC.SE"},
+            {cod: "90101000019", desc: "PURE TOMATE TETRA NOEL"},
+            {cod: "90101006616", desc: "PULPA DE TOMATE SUAVE 12X520"},
+            {cod: "90101000036", desc: "PULPA DE TOMATE NOEL 12X520 GR"},
+            {cod: "90105041457", desc: "PURE DE TOMATE ARCOR 12X520 GR"},
+            {cod: "90101000296", desc: "PULPA DE TOMATE 12X520 G LC"},
+            {cod: "90101001831", desc: "PULPA T.SALSATI 12X520 G"},
+            {cod: "90101013109", desc: "PURE.TOMATE.ARCOR.12X1050G"},
+            {cod: "90101013115", desc: "PURE.TOM.12X1020.CICA.UL"}
+        ],
+        "PT": [
+            {cod: "90101005671", desc: "TOM.CUBETEADO ARCOR 2X12X400G"},
+            {cod: "90101000039", desc: "TOMATE PEL.ENT.NOEL.2X12X400G"},
+            {cod: "90101000241", desc: "TOM.PEL.PERIT.ENT.LC.2X12X400G"},
+            {cod: "90101000245", desc: "TOM.PEL.PER.SALSATI 2X12X400G"},
+            {cod: "90101000248", desc: "TOM.CUBET.SALSATI 2X12X400G"},
+            {cod: "90101005679", desc: "TOMATE PEL.PER.2X12X400 G.ARCO"},
+            {cod: "90101010594", desc: "TOM.CUBETEADO.LC.2X12X400G"},
+            {cod: "90105040172", desc: "TOM.PEL.CARGIL.2X12X400.BRASIL"},
+            {cod: "90105031935", desc: "LA CAMPAGNOLA (Angeloni-Brasil)"},
+            {cod: "90105028888", desc: "TOM PELADO PERITAS ENT (Uruguay)"},
+            {cod: "90101010912", desc: "TOMATE.PEL.ENTER.2X12X400G.S&P"},
+            {cod: "90105031936", desc: "TOMATES ENT.PERITAS LC 24X400G"},
+            {cod: "90105040536", desc: "TOM.ENT.2X12X400 G.ARCOR.ECUAD"},
+            {cod: "90105040823", desc: "CUBETI.CARGIL.2X12X400G.BRASIL"},
+            {cod: "50300205810", desc: "TOM.ENT.2X12X400.SABORES.VALL"},
+            {cod: "90105040012", desc: "TOM.PEL.DIA%.24X400.BRASIL"},
+            {cod: "90105031573", desc: "TOMATE PEL.PERITA CAMPA.24X400"},
+            {cod: "90105041571", desc: "TOM.CUBET.CHOPPED.TOMAT 2X12X400"},
+            {cod: "90105041900", desc: "TOM.ENT.COLOLO.2X12X400G.URUG"},
+            {cod: "90105041573", desc: "TOM.ENTER.CARGILL.2X12X400G.AF"}
+        ],
+        "SE": [
+            {cod: "50300201692", desc: "TOM.CU.24X400.M.IN.SE"},
+            {cod: "50300201686", desc: "TOM.EN.24X400.ME.IN"},
+            {cod: "50300208561", desc: "TOM.ENT.EXPO.CAL+B.24X400G"},
+            {cod: "50300102463", desc: "TO.ENT+PUR.8°BX.24X400.SALSATI"},
+            {cod: "50300102462", desc: "TO.CUB+PUR.8°BX.24X400.SALSATI"},
+            {cod: "50300205695", desc: "TOM.ENTERO 24x400g.EXPORTACION"},
+            {cod: "50300202362", desc: "TOMATE.ENTERO.+A/F.24X400G"},
+            {cod: "50300201690", desc: "TOMATE.CUBET.SE.24X400G.EXPORT"},
+            {cod: "50300208553", desc: "TOM.ENT.A/F.EXPO.CAL+B.24X400G"}
+        ],
+        "PASTAS": [
+            {cod: "50300407242", desc: "PASTA.TOM.BOL.ASEP.PAMPA.BULK"},
+            {cod: "50300700354", desc: "PASTA.TOMATE.ENVASADA.29°BX"},
+            {cod: "50300402239", desc: "EXTRAC.DOBLE.BOL.ASEPTICA.Z79"},
+            {cod: "50300102709", desc: "CUBOS.TOMATE.ASEP.PURE.8°BX"},
+            {cod: "50300409402", desc: "PASTA.TOMATE.TAMBOR.EXPO.CAL.A"},
+            {cod: "50300709403", desc: "PASTA.TOMATE.PAMPA.EXP.CAL.A"},
+            {cod: "50300104158", desc: "CUBOS.ASEP+PUR.15°B.MERM.5/8"},
+            {cod: "50300408927", desc: "PASTA.TOMATE.TAMBOR.EXPO.CAL.B"},
+            {cod: "50300708639", desc: "PASTA.TOMATE.PAMPA.EXPO.CAL.B"},
+            {cod: "50300408694", desc: "EXTRAC.DOBLE.BOL.ASEPTICA.24BX"},
+            {cod: "50300710031", desc: "SE.PURE.TOMATE.10BX.PASSATA"},
+            {cod: "90204616538", desc: "PASTA.TOM.TAMB.CAL.A.30-32BX"}
+        ],
+    };
+
+    window.onload = () => {
+        document.getElementById('fechaEtiqueta').value = new Date().toISOString().split('T')[0];
+        // Añadimos el escucha para la validación de copias
+        document.getElementById('copias').addEventListener('input', validarSeguridad);
+    };
+
+    function toggleEncabezado() {
+        document.getElementById('sectionEncabezado').classList.toggle('hidden', !document.getElementById('chkEncabezado').checked);
+    }
+
+    function cargarProductos() {
+        const linea = document.getElementById('selectLinea').value;
+        const combo = document.getElementById('selectProducto');
+        combo.innerHTML = '';
+        if (linea && baseDeProductos[linea]) {
+            baseDeProductos[linea].forEach(p => {
+                let opt = document.createElement('option');
+                opt.value = `${p.cod}|${p.desc}`;
+                opt.text = `${p.cod} - ${p.desc}`;
+                combo.appendChild(opt);
+            });
+        }
+    }
+
+    // Nueva función de validación de seguridad para copias e interfaz
+    function validarSeguridad() {
+        const inputCopias = document.getElementById('copias');
+        const btnImprimir = document.querySelector('button');
+        const num = parseInt(inputCopias.value);
+
+        if (num > 10 || num < 1 || isNaN(num)) {
+            inputCopias.style.borderColor = "#ff5252";
+            inputCopias.style.backgroundColor = "#fff1f1";
+            btnImprimir.disabled = true;
+            btnImprimir.style.opacity = "0.5";
+            btnImprimir.innerText = "MÁXIMO 10 COPIAS";
+        } else {
+            inputCopias.style.borderColor = "#eaedf2";
+            inputCopias.style.backgroundColor = "white";
+            btnImprimir.disabled = false;
+            btnImprimir.style.opacity = "1";
+            btnImprimir.innerText = "IMPRIMIR ETIQUETA";
+        }
+    }
+
+    function validar() {
+        const size = document.getElementById('tamano').value;
+        const area = document.getElementById('textoEtiqueta');
+        const info = document.getElementById('infoExtraGrande');
+        
+        if (size === "210") {
+            info.classList.remove('hidden');
+            // Límite estricto de 15 caracteres para tamaño Extra Grande
+            if (area.value.length > 15) {
+                area.value = area.value.substring(0, 15);
+            }
+            area.style.borderColor = "#ff5252";
+            area.style.backgroundColor = "#fff1f1";
+        } else {
+            info.classList.add('hidden');
+            area.style.borderColor = "#eaedf2";
+            area.style.backgroundColor = "white";
+        }
+    }
+
+    async function imprimir() {
+        const ip = document.getElementById('printerIp').value;
+        const copiasVal = document.getElementById('copias').value;
+        const copias = parseInt(copiasVal);
+        const textoPrincipal = document.getElementById('textoEtiqueta').value.toUpperCase().trim();
+        let size = parseInt(document.getElementById('tamano').value);
+        const orient = document.getElementById('orientacion').value;
+        const status = document.getElementById('status');
+        
+        // Verificación final de seguridad antes de enviar a la Zebra
+        if (copias > 10 || copias < 1 || isNaN(copias)) {
+            alert("⚠️ Error: Solo se permite imprimir entre 1 y 10 copias.");
+            return;
+        }
+
+        const tieneEncabezado = document.getElementById('chkEncabezado').checked;
+        const modoInvertido = document.getElementById('chkInversion').checked;
+
+        let zpl = `^XA^PW812^LL1218`;
+
+        if (modoInvertido) {
+            zpl += `^FO0,0^GB812,1218,1218^FS`;
+        }
+
+        // Lógica de Encabezado
+        if (tieneEncabezado) {
+            const val = document.getElementById('selectProducto').value;
+            if (val) {
+                const prod = val.split('|');
+                const f = document.getElementById('fechaEtiqueta').value.split('-');
+                const txtEnc = `${prod[0]} ${prod[1]} ${f[2]}/${f[1]}/${f[0]}`;
+                const rev = modoInvertido ? "^FR" : "";
+                
+                if (orient === 'V') {
+                    zpl += `^FO20,30^A0N,28,28${rev}^FD${txtEnc}^FS`;
+                    if(!modoInvertido) zpl += `^FO20,65^GB770,2,2^FS`;
+                } else {
+                    zpl += `^FO750,20^A0R,28,28${rev}^FD${txtEnc}^FS`;
+                    if(!modoInvertido) zpl += `^FO740,20^GB2,1180,2^FS`;
+                }
+            }
+        }
+
+        // Autoescalado para tamaño Extra Grande
+        if (size === 210 && textoPrincipal) {
+            const max = (orient === 'V') ? 770 : 1170;
+            let ancho = textoPrincipal.length * (size * 0.72);
+            if (ancho > max) size = Math.floor(max / (textoPrincipal.length * 0.72));
+        }
+
+        // Lógica de Texto Principal
+        if (textoPrincipal) {
+            const nL = textoPrincipal.split('\n').length;
+            const rev = modoInvertido ? "^FR" : "";
+            if (orient === 'V') {
+                let pY = 640 - ((nL * size) / 2);
+                zpl += `^FO20,${pY}^A0N,${size},${size}^FB772,${nL},0,C${rev}^FD${textoPrincipal.replace(/\n/g, '\\&')}^FS`;
+            } else {
+                let pX = 380 - ((nL * size) / 2);
+                zpl += `^FO${pX},20^A0R,${size},${size}^FB1180,${nL},0,C${rev}^FD${textoPrincipal.replace(/\n/g, '\\&')}^FS`;
+            }
+        }
+
+        zpl += `^PQ${copias}^XZ`;
+
+        status.style.display = "block";
+        status.style.background = "#fff3cd";
+        status.innerText = "Enviando trabajo...";
+
+        try {
+            await fetch(`http://${ip}/pstprnt`, { method: 'POST', mode: 'no-cors', body: zpl });
+            status.style.background = "#d4edda";
+            status.innerText = "¡Impresión enviada!";
+        } catch (e) {
+            status.style.background = "#f8d7da";
+            status.innerText = "Error: Sin conexión con la impresora";
+        }
+        setTimeout(() => { status.style.display = "none"; }, 3000);
+    }
+</script>
+    </body>
+    </html>

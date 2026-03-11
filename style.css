@@ -1,0 +1,391 @@
+/* ==========================================================================
+   1. CONFIGURACIÓN DE VARIABLES (THEMING)
+   ========================================================================== */
+:root {
+    /* Modo Claro (Default) */
+    --primary-color: #0056b3;
+    --primary-hover: #004494;
+    --bg-body: #f0f4f8;
+    --bg-card: #ffffff;
+    --bg-section: #f8f9fa;
+    --bg-input: #ffffff;
+    --text-main: #333333;
+    --text-label: #555555;
+    --border-color: #eaedf2;
+    --shadow: rgba(0, 0, 0, 0.1);
+    
+    /* Estados */
+    --error-color: #ff5252;
+    --error-bg: #fff1f1;
+    --success-bg: #d4edda;
+    --warning-bg: #fff3cd;
+    --disabled-text: #a0a0a0;
+}
+
+[data-theme="dark"] {
+    --primary-color: #3d8bfd;
+    --primary-hover: #2b76e2;
+    --bg-body: #121212;
+    --bg-card: #1e1e1e;
+    --bg-section: #2d2d2d;
+    --bg-input: #2d2d2d;
+    --text-main: #e0e0e0;
+    --text-label: #bbbbbb;
+    --border-color: #444444;
+    --shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   2. ESTILOS BASE Y LAYOUT
+   ========================================================================== */
+* { 
+    box-sizing: border-box; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+}
+
+html, body {
+    height: 100%; 
+    margin: 0;
+    overscroll-behavior: none; 
+}
+
+body { 
+    background-color: var(--bg-body); 
+    color: var(--text-main);
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: flex-start;
+    padding: 20px; 
+    padding-bottom: 50px;
+    overflow-y: auto;
+}
+
+/* ==========================================================================
+   3. COMPONENTES PRINCIPALES (CARD & SECTIONS)
+   ========================================================================== */
+.card { 
+    background: var(--bg-card); 
+    padding: 25px; 
+    border-radius: 20px; 
+    box-shadow: 0 10px 25px var(--shadow); 
+    width: 100%; 
+    max-width: 550px; 
+    border-top: 8px solid var(--primary-color); 
+}
+
+header { 
+    text-align: center; 
+    margin-bottom: 20px; 
+}
+
+.logo-arcor { 
+    max-width: 140px; 
+    margin-bottom: 10px; 
+}
+
+.section { 
+    background: var(--bg-section); 
+    border: 1px solid var(--border-color); 
+    padding: 15px; 
+    border-radius: 12px; 
+    margin-bottom: 20px; 
+}
+
+/* ==========================================================================
+   4. FORMULARIOS E INPUTS
+   ========================================================================== */
+label { 
+    display: block; 
+    margin-bottom: 5px; 
+    font-weight: 600; 
+    color: var(--text-label); 
+    font-size: 0.85rem; 
+}
+
+select, input, textarea { 
+    width: 100%; 
+    padding: 10px; 
+    background-color: var(--bg-input);
+    color: var(--text-main);
+    border: 2px solid var(--border-color); 
+    border-radius: 8px; 
+    margin-bottom: 12px; 
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+textarea { 
+    height: 80px; 
+    resize: none; 
+    text-transform: uppercase; 
+    font-weight: bold; 
+}
+
+.row { 
+    display: flex; 
+    gap: 10px; 
+}
+
+.row div { flex: 1; }
+
+/* Estados de Formulario */
+select option:disabled { color: var(--disabled-text); font-style: italic; }
+select:invalid, select option[value=""] { color: var(--disabled-text); }
+input:disabled, select:disabled { 
+    background-color: var(--bg-body); 
+    color: var(--disabled-text); 
+    cursor: not-allowed; 
+    opacity: 0.7; 
+}
+
+/* ==========================================================================
+   5. BOTONES Y CONTROLES
+   ========================================================================== */
+button { 
+    width: 100%; 
+    padding: 16px; 
+    background: var(--primary-color); 
+    color: white; 
+    border: none; 
+    border-radius: 12px; 
+    font-size: 1.1rem; 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: 0.2s; 
+}
+
+button:hover:not(:disabled) { 
+    background: var(--primary-hover); 
+    transform: translateY(-2px); 
+}
+
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-cancelar { background: #6c757d; margin-top: 10px; }
+.btn-cancelar:hover { background: #5a6268; }
+
+.floating-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    z-index: 2000;
+    transition: 0.3s;
+}
+
+.controls-group { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+    gap: 10px;
+    background: var(--bg-section); 
+    padding: 15px; 
+    border-radius: 12px; 
+    margin-bottom: 15px; 
+    border: 1px solid var(--border-color);
+    align-items: center; /* Centra verticalmente los checkboxes */
+}
+
+.checkbox-item { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; /* Centra el contenido dentro de su columna */
+    gap: 10px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    color: var(--primary-color); 
+    font-size: 0.85rem;
+    white-space: nowrap; /* Evita que "MODO NEGRO" se ponga en dos líneas */
+    text-align: center;
+}
+.checkbox-item input { 
+    width: 18px; 
+    height: 18px; 
+    margin: 0; 
+    cursor: pointer; 
+}
+
+
+/* ==========================================================================
+   6. SIDEBAR (HISTORIAL)
+   ========================================================================== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -320px; 
+    width: 300px;
+    height: 100%;
+    background: var(--bg-card);
+    box-shadow: 5px 0 15px var(--shadow);
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.sidebar.active { left: 0; }
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+}
+
+.historial-container { flex: 1; overflow-y: auto; }
+
+.mini-card {
+    background: var(--bg-section);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.mini-card:hover { border-color: var(--primary-color); background: var(--bg-body); }
+.mini-card h4 { margin: 0 0 5px 0; font-size: 0.8rem; color: var(--primary-color); }
+.mini-card p { margin: 0; font-size: 0.85rem; font-weight: bold; white-space: pre-wrap; }
+
+.btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-main); width: auto; padding: 0;}
+.btn-clear { background: var(--error-color); font-size: 0.8rem; padding: 10px; margin-top: 10px; }
+
+/* ==========================================================================
+   7. MODALES Y ESTADOS
+   ========================================================================== */
+.modal-overlay {
+    position: fixed; 
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); 
+    backdrop-filter: blur(3px);
+    display: flex; justify-content: center; align-items: center; 
+    z-index: 4000;
+}
+
+.modal-content { 
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 15px;
+    max-width: 350px; 
+    width: 90%;
+    text-align: center; 
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+#status { 
+    margin-top: 5px; /* Reducimos el margen */
+    text-align: center; 
+    padding: 0; /* Quitamos padding inicial */
+    border-radius: 8px; 
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-height: 0; /* Quitamos el min-height que causaba el hueco */
+    transition: all 0.2s ease; /* Para que aparezca suave */
+}
+
+/* ==========================================================================
+   8. UTILIDADES Y FOOTER
+   ========================================================================== */
+.hidden { display: none !important; }
+
+footer { 
+    margin-top: 20px; 
+    color: #888; 
+    font-size: 0.75rem; 
+    text-align: center;
+}   
+
+
+/* ==========================================================================
+   VISTA PREVIA (LABELARY) - ACTUALIZADO
+   ========================================================================== */
+
+/* Botón Flotante de Ojo */
+.preview-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #007bff;
+    color: white;
+    font-size: 24px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 2500;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-btn:hover { 
+    transform: scale(1.1); 
+    background: #0056b3; 
+}
+
+/* ==========================================================================
+   VISTA PREVIA (ESTILO VISUALIZADOR)
+   ========================================================================== */
+
+.modal-content.preview-content {
+    width: 95%;
+    max-width: 500px;
+    height: 90vh; /* Altura fija para forzar el scroll interno si es necesario */
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+}
+
+#previewContainer {
+    flex-grow: 1;
+    overflow-y: auto; /* Scroll tipo PDF */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Empieza desde arriba */
+    background: #525659; /* Gris oscuro tipo lector de PDF */
+    margin: 15px 0;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+}
+
+#labelaryImage {
+    max-width: 100%;
+    height: auto;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    display: block;
+}
+
+.preview-content .btn-cancelar {
+    width: 100%;
+    padding: 15px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    flex-shrink: 0; /* Que no se achique nunca */
+}

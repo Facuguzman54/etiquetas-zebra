@@ -1,64 +1,92 @@
 /* ==========================================================================
-   CONFIGURACIÓN MAESTRA (Edita aquí para agregar impresoras)
+   CONFIGURACIÓN Y VARIABLES GLOBALES
    ========================================================================== */
-const MODO_RESTRINGIDO = false; // 🔓 FALSE: Modo Libre | 🔒 TRUE: Pide contraseñas
+const MODO_RESTRINGIDO = false;
 
 const CONFIG_IMPRESORAS = {
     "10.54.204.171": { nombre: "CONSERVAS", clave: "con2026" },
-    "10.54.204.152": { nombre: "PASTA",     clave: "pas2026" },
+    "10.54.204.152": { nombre: "PASTA", clave: "pas2026" },
     "10.54.204.151": { nombre: "ETIQUETADO", clave: "eti2026" }
 };
 
 let baseDeProductos = {};
-let ultimaImpresora = ""; 
+let ultimaImpresora = "";
 let historial = JSON.parse(localStorage.getItem('historial')) || [];
+let modoActual = 'tabEtiquetaLibre';
 
 /* ==========================================================================
-   INICIALIZACIÓN
+   SISTEMA DE NAVEGACIÓN (TABS)
    ========================================================================== */
-window.onload = async () => {
-    document.getElementById('fechaEtiqueta').value = new Date().toISOString().split('T')[0];
-    document.getElementById('copias').addEventListener('input', validarSeguridad);
+function cambiarTab(evt, nombreTab) {
+    modoActual = nombreTab;
 
-    try {
-        const response = await fetch('productos.json');
-        if (!response.ok) throw new Error("No se pudo cargar la base de productos");
-        baseDeProductos = await response.json();
-    } catch (error) {
-        console.error("Error al cargar JSON:", error);
+    const tabContents = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove("active");
     }
 
-    validarSeguridad();
-    
-    // Cargar Modo Noche guardado
+    const tabBtns = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < tabBtns.length; i++) {
+        tabBtns[i].classList.remove("active");
+    }
+
+    document.getElementById(nombreTab).classList.add("active");
+    if (evt) evt.currentTarget.classList.add("active");
+
+    const controlesExtra = document.getElementById('controles-extra');
+    controlesExtra.style.display = (nombreTab === 'tabModoIC') ? 'none' : 'flex';
+}
+
+/* ==========================================================================
+   INICIALIZACIÓN Y CARGA DE DATOS
+   ========================================================================== */
+window.onload = async () => {
+    const fechaInput = document.getElementById('fechaEtiqueta');
+    if (fechaInput) fechaInput.value = new Date().toISOString().split('T')[0];
+
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
         document.documentElement.setAttribute('data-theme', savedTheme);
         const icon = document.getElementById('theme-icon');
-        if(icon) icon.innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+        if (icon) icon.innerText = savedTheme === 'dark' ? '☀️' : '🌙';
     }
+
+    try {
+        const response = await fetch('productos.json');
+        if (!response.ok) throw new Error("Error carga JSON");
+        baseDeProductos = await response.json();
+        popularDatalistIC();
+    } catch (error) {
+        console.error("Error:", error);
+    }
+
+    document.getElementById('copias').addEventListener('input', validarSeguridad);
+    validarSeguridad();
 };
 
-/* ==========================================================================
-   GESTIÓN DE SEGURIDAD (PASSWORDS Y LÍMITES)
-   ========================================================================== */
+function popularDatalistIC() {
+    const datalist = document.getElementById('listaProductosIC');
+    if (!datalist || !baseDeProductos) return;
 
+    datalist.innerHTML = '';
+    Object.values(baseDeProductos).flat().forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.cod;
+        option.textContent = p.desc;
+        datalist.appendChild(option);
+    });
+}
+
+/* ==========================================================================
+   SEGURIDAD Y VALIDACIONES
+   ========================================================================== */
 function verificarPasswordImpresora() {
     const select = document.getElementById('printerIp');
-    const ipSeleccionada = select.value;
-
-    // Si el modo restringido está apagado, autorizamos la impresora automáticamente
     if (!MODO_RESTRINGIDO) {
-        ultimaImpresora = ipSeleccionada;
-        console.log("Modo Libre: Impresora autorizada sin clave.");
-        return; 
+        ultimaImpresora = select.value;
+        return;
     }
-
-    // Si está prendido, ejecutamos la lógica de siempre
-    if (ipSeleccionada !== "" && ipSeleccionada !== ultimaImpresora) {
-        document.getElementById('modalContentPassword').classList.remove('hidden');
-        document.getElementById('modalContentAlerta').classList.add('hidden');
-        document.getElementById('passImpresora').value = "";
+    if (select.value !== "" && select.value !== ultimaImpresora) {
         mostrarModal();
     }
 }
@@ -66,22 +94,14 @@ function verificarPasswordImpresora() {
 function validarPassword() {
     const passInput = document.getElementById('passImpresora');
     const select = document.getElementById('printerIp');
-    const ipSeleccionada = select.value;
-    const config = CONFIG_IMPRESORAS[ipSeleccionada];
+    const config = CONFIG_IMPRESORAS[select.value];
 
     if (config && passInput.value === config.clave) {
-        ultimaImpresora = ipSeleccionada;
+        ultimaImpresora = select.value;
         cerrarModal();
-        alert(`✅ Acceso concedido a: ${config.nombre}`);
     } else {
-        alert("❌ Contraseña incorrecta para esta impresora");
-        passInput.value = "";
+        alert("❌ Contraseña incorrecta");
     }
-}
-
-function cancelarSeleccion() {
-    document.getElementById('printerIp').value = ultimaImpresora;
-    cerrarModal();
 }
 
 function validarSeguridad() {
@@ -100,60 +120,16 @@ function validarSeguridad() {
     }
 }
 
-
 function mostrarModal() { document.getElementById('modalSeguridad').classList.remove('hidden'); }
 function cerrarModal() { document.getElementById('modalSeguridad').classList.add('hidden'); }
-
-/* ==========================================================================
-   SISTEMA DE HISTORIAL Y SIDEBAR
-   ========================================================================== */
-
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('active');
-    renderizarHistorial();
-}
-
-function guardarEnHistorial(datos) {
-    if (!datos.texto) return;
-    const nuevaEntrada = { id: Date.now(), fecha: new Date().toLocaleTimeString(), ...datos };
-    historial.unshift(nuevaEntrada); 
-    historial = historial.slice(0, 10);
-    localStorage.setItem('historial', JSON.stringify(historial));
-}
-
-function renderizarHistorial() {
-    const lista = document.getElementById('historial-lista');
-    lista.innerHTML = '';
-    historial.forEach(item => {
-        const nombreImp = CONFIG_IMPRESORAS[item.ip]?.nombre || "DESCONOCIDA";
-        const card = document.createElement('div');
-        card.className = 'mini-card';
-        card.onclick = () => cargarParaReimprimir(item);
-        card.innerHTML = `<h4>${item.fecha} - ${nombreImp}</h4><p>${item.texto.substring(0, 40)}...</p>`;
-        lista.appendChild(card);
-    });
-}
-
-function cargarParaReimprimir(item) {
-    document.getElementById('printerIp').value = item.ip;
-    ultimaImpresora = item.ip; 
-    document.getElementById('textoEtiqueta').value = item.texto;
-    document.getElementById('tamano').value = item.tamano;
-    document.getElementById('orientacion').value = item.orientacion;
-    toggleSidebar();
-    validar(); // Agregado para que valide los límites al cargar
-}
-
-function limpiarHistorial() {
-    historial = [];
-    localStorage.removeItem('historial');
-    renderizarHistorial();
+function cancelarSeleccion() {
+    document.getElementById('printerIp').value = ultimaImpresora;
+    cerrarModal();
 }
 
 /* ==========================================================================
-   LÓGICA DE INTERFAZ Y MODO NOCHE
+   LÓGICA DE INTERFAZ Y UI
    ========================================================================== */
-
 function toggleEncabezado() {
     const section = document.getElementById('sectionEncabezado');
     section.classList.toggle('hidden', !document.getElementById('chkEncabezado').checked);
@@ -173,37 +149,22 @@ function cargarProductos() {
     }
 }
 
-function validar() {
-    const textarea = document.getElementById('textoEtiqueta');
-    const texto = textarea.value;
-    const tamano = document.getElementById('tamano').value;
-    const status = document.getElementById('status');
+function autoCompletarDescripcion() {
+    const codBusqueda = document.getElementById('icItem').value;
+    const display = document.getElementById('icDescDisplay');
 
-    // Reset de estilos y visibilidad
-    status.style.display = "none";
-    status.style.padding = "0";
+    if (!codBusqueda) {
+        display.innerText = "";
+        return;
+    }
 
-    if (tamano === "210") {
-        // Bloqueo físico
-        textarea.setAttribute('maxlength', '15');
-        
-        if (texto.length > 15) {
-            // Recorte automático si cambia de tamaño con mucho texto
-            textarea.value = texto.substring(0, 15);
-            status.style.display = "block";
-            status.style.padding = "10px";
-            status.innerText = "⚠️ MÁXIMO 15 CARACTERES";
-            status.style.color = "var(--error-color)";
-        } else if (texto.length === 15) {
-            // Aviso discreto de límite alcanzado
-            status.style.display = "block";
-            status.style.padding = "10px";
-            status.innerText = "⛔ LÍMITE ALCANZADO";
-            status.style.color = "var(--error-color)";
-        }
+    const producto = Object.values(baseDeProductos).flat().find(p => p.cod === codBusqueda);
+    if (producto) {
+        display.innerText = producto.desc;
+        display.style.color = "var(--primary-color)";
     } else {
-        // En cualquier otro tamaño, libertad total de escritura
-        textarea.removeAttribute('maxlength');
+        display.innerText = "Código no encontrado";
+        display.style.color = "var(--error-color)";
     }
 }
 
@@ -216,115 +177,120 @@ function toggleDarkMode() {
 }
 
 /* ==========================================================================
-   CORE: GENERACIÓN Y ENVÍO ZPL
+   GENERACIÓN DE CÓDIGO ZPL
    ========================================================================== */
-
-/**
- * Función Maestra para generar el código ZPL base.
- */
 function generarZPL() {
-    const textoPrincipal = document.getElementById('textoEtiqueta').value.toUpperCase().trim();
-    const size = parseInt(document.getElementById('tamano').value);
-    const orient = document.getElementById('orientacion').value;
-    const modoInvertido = document.getElementById('chkInversion').checked;
+    if (modoActual === 'tabEtiquetaLibre') {
+        const textoPrincipal = document.getElementById('textoEtiqueta').value.toUpperCase().trim();
+        const size = parseInt(document.getElementById('tamano').value);
+        const orient = document.getElementById('orientacion').value;
+        const modoInvertido = document.getElementById('chkInversion').checked;
 
-    let zpl = `^XA^PW812^LL1218`;
-    if (modoInvertido) zpl += `^FO0,0^GB812,1218,1218^FS`;
+        let zpl = `^XA^CI28^PW812^LL1218`;
+        if (modoInvertido) zpl += `^FO0,0^GB812,1218,1218^FS`;
 
-    if (document.getElementById('chkEncabezado').checked) {
-        const val = document.getElementById('selectProducto').value;
-        if (val) {
-            const [cod, desc] = val.split('|');
-            const f = document.getElementById('fechaEtiqueta').value.split('-').reverse().join('/');
-            const txt = `${cod} ${desc} ${f}`;
+        if (document.getElementById('chkEncabezado').checked) {
+            const val = document.getElementById('selectProducto').value;
+            if (val) {
+                const [cod, desc] = val.split('|');
+                const f = document.getElementById('fechaEtiqueta').value.split('-').reverse().join('/');
+                const txt = `${cod} ${desc} ${f}`;
+                const r = modoInvertido ? "^FR" : "";
+
+                if (orient === 'V') {
+                    zpl += `^FT6,39^A0N,27,38${r}^FDINDUSTRIA ARGENTINA^FS`;
+                    zpl += `^FT428,39^A0N,27,35${r}^FDARCOR S.A.I.C.^FS`;
+                    zpl += `^FT6,96^A0N,38,35${r}^FDPLANTA SAN JUAN^FS`;
+                    zpl += `^FO20,130^A0N,28,28${r}^FD${txt}^FS`;
+                } else {
+                    zpl += `^FO750,20^A0R,28,28${r}^FD${txt}^FS`;
+                }
+            }
+        }
+
+        if (textoPrincipal) {
+            const nL = textoPrincipal.split('\n').length;
             const r = modoInvertido ? "^FR" : "";
-            zpl += orient === 'V' ? `^FO20,30^A0N,28,28${r}^FD${txt}^FS` : `^FO750,20^A0R,28,28${r}^FD${txt}^FS`;
+            if (orient === 'V') {
+                let pY = 640 - ((nL * size) / 2);
+                zpl += `^FO20,${pY}^A0N,${size},${size}^FB772,${nL},0,C${r}^FD${textoPrincipal.replace(/\n/g, '\\&')}^FS`;
+            } else {
+                let pX = 380 - ((nL * size) / 2);
+                zpl += `^FO${pX},20^A0R,${size},${size}^FB1180,${nL},0,C${r}^FD${textoPrincipal.replace(/\n/g, '\\&')}^FS`;
+            }
         }
-    }
+        return zpl + `^XZ`;
+    } 
+    
+    if (modoActual === 'tabModoIC') {
+        const itemLargo = document.getElementById('icItem').value;
+        const loteRaw = document.getElementById('icLote').value.trim();
+        const cant = document.getElementById('icCantidad').value.padStart(5, '0');
+        const wo = document.getElementById('icWO').value;
+        const vto = document.getElementById('icVto').value;
 
-    if (textoPrincipal) {
-        const nL = textoPrincipal.split('\n').length;
-        const r = modoInvertido ? "^FR" : "";
-        if (orient === 'V') {
-            let pY = 640 - ((nL * size) / 2);
-            zpl += `^FO20,${pY}^A0N,${size},${size}^FB772,${nL},0,C${r}^FD${textoPrincipal.replace(/\n/g, '\\&')}^FS`;
-        } else {
-            let pX = 380 - ((nL * size) / 2);
-            zpl += `^FO${pX},20^A0R,${size},${size}^FB1180,${nL},0,C${r}^FD${textoPrincipal.replace(/\n/g, '\\&')}^FS`;
-        }
-    }
+        if (!itemLargo || !loteRaw) return "";
 
-    return zpl;
+        const loteCompleto = loteRaw.padStart(12, '0');
+        const producto = Object.values(baseDeProductos).flat().find(p => p.cod === itemLargo);
+        const desc = producto ? producto.desc.toUpperCase() : "";
+        const itemCorto = itemLargo.length > 7 ? itemLargo.slice(-7) : itemLargo;
+        const fab = new Date().toLocaleDateString('es-AR') + " " + new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const vtoShow = vto ? vto.split('-').reverse().join('/') : "";
+        const barcodeData = `0${itemCorto}${loteCompleto}${cant}`;
+
+        return `^XA^CI27^PW799^LL1199^LS0
+^FT6,39^A0N,27,38^FH\\^CI28^FDINDUSTRIA ARGENTINA^FS^CI27
+^FT428,39^A0N,27,35^FH\\^CI28^FDARCOR S.A.I.C. ^FS^CI27
+^FT6,96^A0N,38,35^FH\\^CI28^FDPLANTA SAN JUAN ^FS^CI27
+^FT10,154^A0N,29,28^FH\\^CI28^FDITEM LARGO: ${itemLargo} ^FS^CI27
+^FT6,217^A0N,28,38^FH\\^CI28^FDITEM: ${itemCorto}^FS^CI27
+^FT345,154^A0N,29,33^FH\\^CI28^FD${desc}^FS^CI27
+^FT255,217^A0N,28,33^FH\\^CI28^FDCANTIDAD: ${parseInt(cant)}^FS^CI27
+^FT499,217^A0N,28,33^FH\\^CI28^FDLOTE:${loteCompleto}^FS^CI27
+^FT524,282^A0N,34,38^FH\\^CI28^FDWO:${wo}^FS^CI27
+^FT0,282^A0N,34,33^FB163,1,9,R^FH\\^CI28^FDFECHA VTO ^FS^CI27
+^FT10,346^A0N,34,33^FH\\^CI28^FDFecha de Fab: ${fab}^FS^CI27
+^FT179,282^A0N,34,33^FH\\^CI28^FD${vtoShow}^FS^CI27
+^FT524,346^A0N,34,33^FH\\^CI28^FDCARPETA: 0^FS^CI27
+^FT98,1005^BXN,34,200,0,0,1,_,1^FH\\^FD${barcodeData}^FS
+^FO30,1055^BY3^B2N,95,Y,N,Y^FD${barcodeData} ^FS^BY2
+^PQ1,0,1,Y^XZ`;
+    }
+    return "";
 }
 
-
 /* ==========================================================================
-   PREVIEW CON LABELARY
+   ENVÍO A IMPRESIÓN Y PREVIEW
    ========================================================================== */
 function mostrarPreview() {
-    const texto = document.getElementById('textoEtiqueta').value.trim();
-    const conEncabezado = document.getElementById('chkEncabezado').checked;
-
-    // VALIDACIÓN RECUPERADA
-    if (texto === "" && !conEncabezado) {
-        alert("⚠️ Por favor, escriba el contenido de la etiqueta o active el encabezado.");
-        return;
-    }
-
-    const zpl = generarZPL() + `^XZ`; 
-    const imgElement = document.getElementById('labelaryImage');
-    const modal = document.getElementById('modalPreview');
-    
-    // Labelary API - Se mantiene fiel a la impresión real
+    const zpl = generarZPL();
     const url = `http://api.labelary.com/v1/printers/8dpmm/labels/4x6/0/${encodeURIComponent(zpl)}`;
-    
-    imgElement.src = url;
-    modal.classList.remove('hidden');
+    document.getElementById('labelaryImage').src = url;
+    document.getElementById('modalPreview').classList.remove('hidden');
 }
 
 function cerrarPreview() {
-    const modal = document.getElementById('modalPreview');
-    const modalBox = document.querySelector('.preview-content');
-    
-    modal.classList.add('hidden');
-    modalBox.classList.remove('landscape'); // Limpiamos la rotación
-    document.getElementById('labelaryImage').src = ""; 
+    document.getElementById('modalPreview').classList.add('hidden');
+    document.getElementById('labelaryImage').src = "";
 }
 
-/* ==========================================================================
-   IMPRESIÓN REAL
-   ========================================================================== */
 async function imprimir() {
     const ip = document.getElementById('printerIp').value;
-    const copias = parseInt(document.getElementById('copias').value);
+    const copias = document.getElementById('copias').value;
     const status = document.getElementById('status');
 
-    if (ip === "" || copias > 10) {
-        document.getElementById('modalContentPassword').classList.add('hidden');
-        document.getElementById('modalContentAlerta').classList.remove('hidden');
-        document.getElementById('mensajeAlerta').innerText = ip === "" ? "Seleccione impresora." : "Máximo 10 copias.";
-        mostrarModal();
-        return;
-    }
+    if (!ip) return alert("Seleccione impresora");
 
-    // Guardar en historial
-    const textoPrincipal = document.getElementById('textoEtiqueta').value.toUpperCase().trim();
-    const size = parseInt(document.getElementById('tamano').value);
-    const orient = document.getElementById('orientacion').value;
-    guardarEnHistorial({ ip, texto: textoPrincipal, tamano: size, orientacion: orient });
-    
-    // Si el sidebar está abierto, lo cerramos
-    document.getElementById('sidebar').classList.remove('active');
+    let textoHist = modoActual === 'tabEtiquetaLibre' ? 
+        document.getElementById('textoEtiqueta').value : 
+        `IC: ${document.getElementById('icItem').value}`;
 
-    // Generar ZPL final con copias
-    let zplFinal = generarZPL();
-    zplFinal += `^PQ${copias}^XZ`;
+    guardarEnHistorial({ ip, texto: textoHist });
 
-    // UI Feedback
+    let zplFinal = generarZPL().replace('^XZ', `^PQ${copias}^XZ`);
     status.style.display = "block";
-    status.style.padding = "10px";
     status.innerText = "Enviando...";
-    status.style.color = "var(--text-main)";
 
     try {
         await fetch(`http://${ip}/pstprnt`, { method: 'POST', mode: 'no-cors', body: zplFinal });
@@ -334,9 +300,37 @@ async function imprimir() {
         status.innerText = "Error conexión";
         status.style.color = "red";
     }
-    
-    setTimeout(() => { 
-        status.style.display = "none"; 
-        status.style.padding = "0"; 
-    }, 3000);
+    setTimeout(() => status.style.display = "none", 3000);
+}
+
+/* ==========================================================================
+   GESTIÓN DE HISTORIAL
+   ========================================================================== */
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+    renderizarHistorial();
+}
+
+function guardarEnHistorial(datos) {
+    if (!datos.texto) return;
+    historial.unshift({ id: Date.now(), fecha: new Date().toLocaleTimeString(), ...datos });
+    historial = historial.slice(0, 10);
+    localStorage.setItem('historial', JSON.stringify(historial));
+}
+
+function renderizarHistorial() {
+    const lista = document.getElementById('historial-lista');
+    lista.innerHTML = '';
+    historial.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'mini-card';
+        card.innerHTML = `<h4>${item.fecha}</h4><p>${item.texto.substring(0, 30)}...</p>`;
+        lista.appendChild(card);
+    });
+}
+
+function limpiarHistorial() {
+    historial = [];
+    localStorage.removeItem('historial');
+    renderizarHistorial();
 }

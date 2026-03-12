@@ -389,3 +389,110 @@ footer {
     cursor: pointer;
     flex-shrink: 0; /* Que no se achique nunca */
 }
+
+/* ==========================================================================
+   SISTEMA DE TABS (PESTAÑAS)
+   ========================================================================== */
+.tabs-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.tab-header {
+    display: flex;
+    background: var(--bg-section);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--text-label);
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    background: var(--bg-card);
+    border-bottom-color: var(--primary-color);
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Contenido de las Tabs */
+.tab-content {
+    display: none;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   FORMULARIO MODO IC (GRID)
+   ========================================================================== */
+.form-ic-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Dos columnas */
+    gap: 15px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.input-group label {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--text-label);
+    text-transform: uppercase;
+}
+
+.input-group input {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.1);
+}
+
+/* Responsividad para móviles (una sola columna) */
+@media (max-width: 480px) {
+    .form-ic-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tab-btn {
+        font-size: 0.8rem;
+        padding: 12px 5px;
+    }
+}

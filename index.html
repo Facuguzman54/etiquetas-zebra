@@ -36,6 +36,7 @@
     <button class="floating-btn" style="left: 20px; right: auto;" onclick="toggleSidebar()">
         <span>📜</span>
     </button>
+
     <div class="card">
         <header>
             <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Arcor_textlogo.png" alt="Arcor"
@@ -60,57 +61,103 @@
             </div>
         </div>
 
-        <div class="controls-group">
-            <label class="checkbox-item">
-                <input type="checkbox" id="chkEncabezado" onchange="toggleEncabezado()"> ENCABEZADO
-            </label>
-            <label class="checkbox-item">
-                <input type="checkbox" id="chkInversion"> MODO NEGRO
-            </label>
+        <div class="tabs-container">
+            <div class="tab-header">
+                <button class="tab-btn active" onclick="cambiarTab(event, 'tabEtiquetaLibre')">MODO ETIQUETA</button>
+                <button class="tab-btn" onclick="cambiarTab(event, 'tabModoIC')">MODO IC</button>
+            </div>
+
+            <div class="tab-body">
+                <div id="tabEtiquetaLibre" class="tab-content active">
+                    <div class="controls-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="chkEncabezado" onchange="toggleEncabezado()"> ENCABEZADO
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="chkInversion"> MODO NEGRO
+                        </label>
+                    </div>
+
+                    <div id="sectionEncabezado" class="section hidden">
+                        <label>TIPO DE PRODUCTO</label>
+                        <select id="selectLinea" onchange="cargarProductos()">
+                            <option value="">-- Seleccione linea --</option>
+                            <option value="SALSAS">SALSAS Y ADEREZOS</option>
+                            <option value="PURE_PULPA">PURE Y PULPA</option>
+                            <option value="PASTAS">PASTAS</option>
+                            <option value="PT">TOMATE (PT)</option>
+                            <option value="SE">TOMATE (SE)</option>
+                        </select>
+
+                        <label>PRODUCTO</label>
+                        <select id="selectProducto">
+                            <option value="">Elija una linea primero...</option>
+                        </select>
+
+                        <label>FECHA</label>
+                        <input type="date" id="fechaEtiqueta">
+                    </div>
+
+                    <label>CONTENIDO DE LA ETIQUETA</label>
+                    <textarea id="textoEtiqueta" placeholder="ESCRIBA AQUÍ..." oninput="validar()"></textarea>
+                </div>
+
+<div id="tabModoIC" class="tab-content">
+    <div class="form-ic-grid">
+        <div class="input-group">
+            <label for="icItem">Producto / Código</label>
+            <input type="text" id="icItem" list="listaProductosIC" 
+                   placeholder="Buscar o digitar código..." 
+                   oninput="autoCompletarDescripcion()">
+            <datalist id="listaProductosIC"></datalist>
+            <small id="icDescDisplay" style="color: var(--primary-color); font-size: 0.7rem; font-weight: bold; min-height: 1.2em; display: block;"></small>
         </div>
 
-        <div id="sectionEncabezado" class="section hidden">
-            <label>TIPO DE PRODUCTO</label>
-            <select id="selectLinea" onchange="cargarProductos()">
-                <option value="">-- Seleccione linea --</option>
-                <option value="SALSAS">SALSAS Y ADEREZOS</option>
-                <option value="PURE_PULPA">PURE Y PULPA</option>
-                <option value="PASTAS">PASTAS</option>
-                <option value="PT">TOMATE (PT)</option>
-                <option value="SE">TOMATE (SE)</option>
-            </select>
-
-            <label>PRODUCTO</label>
-            <select id="selectProducto">
-                <option value="">Elija una linea primero...</option>
-            </select>
-
-            <label>FECHA</label>
-            <input type="date" id="fechaEtiqueta">
+        <div class="input-group">
+            <label for="icLote">Lote (Se completará a 12 dígitos)</label>
+            <input type="text" id="icLote" placeholder="Ej: 35545957" maxlength="12">
+            <small id="loteHelper" style="color: var(--disabled-text); font-size: 0.65rem;">Se añadirán ceros automáticamente al inicio.</small>
         </div>
 
-        <label>CONTENIDO DE LA ETIQUETA</label>
-        <textarea id="textoEtiqueta" placeholder="ESCRIBA AQUÍ..." oninput="validar()"></textarea>
+        <div class="input-group">
+            <label for="icCantidad">Cantidad</label>
+            <input type="number" id="icCantidad" placeholder="Ej: 52">
+        </div>
+
+        <div class="input-group">
+            <label for="icWO">Orden de Trabajo (WO)</label>
+            <input type="text" id="icWO" placeholder="Ej: 52955177">
+        </div>
+
+        <div class="input-group">
+            <label for="icVto">Fecha Vto.</label>
+            <input type="date" id="icVto">
+        </div>
+        
+        </div>
+</div>
+            </div>
+        </div>
         <div id="status"></div>
 
-        <div class="row">
-            <div>
-                <label>TAMAÑO</label>
-                <select id="tamano" onchange="validar()">
-                    <option value="60">Pequeño</option>
-                    <option value="100" selected>Mediano</option>
-                    <option value="160">Grande</option>
-                    <option value="210">Extra Grande</option>
-                </select>
-            </div>
-            <div>
-                <label>ORIENTACIÓN</label>
-                <select id="orientacion">
-                    <option value="V">Vertical</option>
-                    <option value="H">Horizontal</option>
-                </select>
-            </div>
-        </div>
+ <div class="row" id="controles-extra">
+    <div>
+        <label>TAMAÑO</label>
+        <select id="tamano" onchange="validar()">
+            <option value="60">Pequeño</option>
+            <option value="100" selected>Mediano</option>
+            <option value="160">Grande</option>
+            <option value="210">Extra Grande</option>
+        </select>
+    </div>
+    <div>
+        <label>ORIENTACIÓN</label>
+        <select id="orientacion">
+            <option value="V">Vertical</option>
+            <option value="H">Horizontal</option>
+        </select>
+    </div>
+</div>
 
         <button id="btnImprimir" onclick="imprimir()">IMPRIMIR ETIQUETA</button>
     </div>
@@ -137,7 +184,7 @@
         </div>
     </div>
 
-    <footer>Hecho por Facu - v3.5</footer>
+    <footer>Hecho por Facu - v4.0</footer>
     <button class="preview-btn" onclick="mostrarPreview()" title="Vista Previa">
         <span id="eye-icon">👁️</span>
     </button>

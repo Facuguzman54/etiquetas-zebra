@@ -1,380 +1,104 @@
 {
     "SALSAS": [
-        {
-            "cod": "90101009275",
-            "desc": "SALSA POMAROLA LC DP 24X340 G"
-        },
-        {
-            "cod": "90101009276",
-            "desc": "SALSA PORTUGUESA LC DP 24X340G"
-        },
-        {
-            "cod": "90101009278",
-            "desc": "SALSA PORTUGUESA LC DP 24X340G"
-        },
-        {
-            "cod": "90101009279",
-            "desc": "SALSA FILETTO LC DP 24X340 G"
-        },
-        {
-            "cod": "90101009339",
-            "desc": "SALSA ITALIANA LC DP 24X340 G"
-        },
-        {
-            "cod": "90101009459",
-            "desc": "SALSA NOEL POMAROLA DP 24X340G"
-        },
-        {
-            "cod": "90101009465",
-            "desc": "SAL.NOEL PORTUGUESA DP.24X340G"
-        },
-        {
-            "cod": "90101009466",
-            "desc": "SALSA NOEL FILETTO DP.24X340G"
-        },
-        {
-            "cod": "90101009467",
-            "desc": "SALSA PIZZA NOEL D.PACK 24X340"
-        },
-        {
-            "cod": "90101009558",
-            "desc": "SAL.POMAROLA ARCOR DP.24X340g"
-        },
-        {
-            "cod": "90101009564",
-            "desc": "SAL.PORTUGUESA ARCOR DP.24X340"
-        },
-        {
-            "cod": "90101009565",
-            "desc": "SALSA FILETTO ARCOR DP.24X340g"
-        },
-        {
-            "cod": "90101009566",
-            "desc": "SAL.ITALIANA.ARCOR. DP.24X340g"
-        },
-        {
-            "cod": "90101009567",
-            "desc": "SALSA PIZZA ARCOR DP. 24X340g."
-        },
-        {
-            "cod": "90101009569",
-            "desc": "SAL.NAPOLITANA ARCOR DP.24X340"
-        },
-        {
-            "cod": "90101009694",
-            "desc": "SALSA TUCO ARCOR D.PACK 24X340"
-        },
-        {
-            "cod": "90101010301",
-            "desc": "KETCHUP.DOYP.LA.CAMPAG.24X250G"
-        },
-        {
-            "cod": "90101010302",
-            "desc": "KETCHUP.PICANTE.DP.LC.24X250G"
-        },
-        {
-            "cod": "50309005523",
-            "desc": "DOYPACK.KETCHUP.LC.250G.BCO"
-        },
-        {
-            "cod": "50300304473",
-            "desc": "ARCOR.DOYPACK.PIZZA.24X340G"
-        },
-        {
-            "cod": "50300304465",
-            "desc": "SALSATI.DOYPACK.FILETTO.24X340"
-        },
-        {
-            "cod": "90105041408",
-            "desc": "SALSA.TUCO.ARCOR.DP.24X200G"
-        },
-        {
-            "cod": "90105040840",
-            "desc": "SALSA PIZZA ARCOR DP. 24X200G."
-        },
-        {
-            "cod": "90105040841",
-            "desc": "SAL.POMAROLA ARCOR DP.24X200G"
-        },
-        {
-            "cod": "90101012347",
-            "desc": "SALSA.BARBACOA.LC.24X250G"
-        },
-        {
-            "cod": "90101012685",
-            "desc": "SALSA PIZZA 24X200G ARCOR"
-        },
-        {
-            "cod": "90101012684",
-            "desc": "SALSA FILETTO 24X200G ARCOR"
-        },
-        {
-            "cod": "90101013444",
-            "desc": "SALS.ITA.LC.24X340G.DPNF"
-        },
-        {
-            "cod": "90101013313",
-            "desc": "SALS.POM.ARCOR.24X340.DPNF"
-        },
-        {
-            "cod": "90101013314",
-            "desc": "SALS.POM.LC.24X340.DPNF"
-        },
-        {
-            "cod": "90101013315",
-            "desc": "SALS.PIZ.ARCOR.24X340.DPNF"
-        },
-        {
-            "cod": "90101013316",
-            "desc": "SALS.PIZ.LC.24X340.DPNF"
-        },
-        {
-            "cod": "90101013317",
-            "desc": "SALS.FILETTO.LC.24X340.DPNF"
-        },
-        {
-            "cod": "90101013318",
-            "desc": "SALS.FILETTO.ARCOR.24X340.DPNF"
-        },
-        {
-            "cod": "90101013449",
-            "desc": "SAL.PORT.ARCOR.24X340G.DPNF"
-        },
-        {
-            "cod": "90101013450",
-            "desc": "SAL.ITA.ARCOR.24X340G.DPNF"
-        },
-        {
-            "cod": "90101013451",
-            "desc": "SAL.TUCO.ARCOR.24X340G.DPNF"
-        }
+        {"cod": "90101009275", "desc": "SALSA POMAROLA LC DP 24X340 G"},
+        {"cod": "90101009276", "desc": "SALSA PORTUGUESA LC DP 24X340G"},
+        {"cod": "90101009278", "desc": "SALSA PIZZA LC DP 24 X 340 G"},
+        {"cod": "90101009279", "desc": "SALSA FILETTO LC DP 24X340 G"},
+        {"cod": "90101009339", "desc": "SALSA ITALIANA LC DP 24X340 G"},
+        {"cod": "90101009459", "desc": "SALSA NOEL POMAROLA DP 24X340G"},
+        {"cod": "90101009465", "desc": "SAL.NOEL PORTUGUESA DP.24X340G"},
+        {"cod": "90101009466", "desc": "SALSA NOEL FILETTO DP.24X340G"},
+        {"cod": "90101009467", "desc": "SALSA PIZZA NOEL D.PACK 24X340"},
+        {"cod": "90101009558", "desc": "SALSA POMAROLA ARCOR DP 24 X 340 G"},
+        {"cod": "90101009564", "desc": "SAL.PORTUGUESA ARCOR DP.24X340"},
+        {"cod": "90101009565", "desc": "SALSA FILETTO ARCOR DP.24X340G"},
+        {"cod": "90101009566", "desc": "SAL.ITALIANA.ARCOR. DP.24X340G"},
+        {"cod": "90101009567", "desc": "SALSA PIZZA ARCOR DP. 24X340G"},
+        {"cod": "90101009569", "desc": "SAL.NAPOLITANA ARCOR DP.24X340"},
+        {"cod": "90101009694", "desc": "SALSA TUCO ARCOR D.PACK 24X340"},
+        {"cod": "90101010301", "desc": "KETCHUP.DOYP.LA.CAMPAG.24X250G"},
+        {"cod": "90101010302", "desc": "KETCHUP.PICANTE.DP.LC.24X250G"},
+        {"cod": "50309005523", "desc": "DOYPACK.KETCHUP.LC.250G.BCO"},
+        {"cod": "50300304473", "desc": "ARCOR.DOYPACK.PIZZA.24X340G"},
+        {"cod": "50300304465", "desc": "SALSATI.DOYPACK.FILETTO.24X340"},
+        {"cod": "90105041408", "desc": "SALSA.TUCO.ARCOR.DP.24X200G"},
+        {"cod": "90105040840", "desc": "SALSA PIZZA ARCOR DP. 24X200G"},
+        {"cod": "90105040841", "desc": "SAL.POMAROLA ARCOR DP.24X200G"},
+        {"cod": "90101012347", "desc": "SALSA.BARBACOA.LC.24X250G"},
+        {"cod": "90101012685", "desc": "SALSA PIZZA 24X200G ARCOR"},
+        {"cod": "90101012684", "desc": "SALSA FILETTO 24X200G ARCOR"},
+        {"cod": "90101013444", "desc": "SALS.ITA.LC.24X340G.DPNF"},
+        {"cod": "90101013313", "desc": "SALS.POM.ARCOR.24X340.DPNF"},
+        {"cod": "90101013314", "desc": "SALS.POM.LC.24X340.DPNF"},
+        {"cod": "90101013315", "desc": "SALS.PIZ.ARCOR.24X340.DPNF"},
+        {"cod": "90101013316", "desc": "SALS.PIZ.LC.24X340.DPNF"},
+        {"cod": "90101013317", "desc": "SALS.FILETTO.LC.24X340.DPNF"},
+        {"cod": "90101013318", "desc": "SALS.FILETTO.ARCOR.24X340.DPNF"},
+        {"cod": "90101013449", "desc": "SAL.PORT.ARCOR.24X340G.DPNF"},
+        {"cod": "90101013450", "desc": "SAL.ITA.ARCOR.24X340G.DPNF"},
+        {"cod": "90101013451", "desc": "SAL.TUCO.ARCOR.24X340G.DPNF"}
     ],
     "PURE_PULPA": [
-        {
-            "cod": "90101006614",
-            "desc": "PURE DE TOMATE ARCOR 12X520 GR"
-        },
-        {
-            "cod": "90101001832",
-            "desc": "PURE T.SALSATI 12X520 G"
-        },
-        {
-            "cod": "50300600260",
-            "desc": "PUR.TOM.TETRA.12X520.BLANCO"
-        },
-        {
-            "cod": "50300600236",
-            "desc": "PURE.TOM.TETRA.12X520.BLANCO"
-        },
-        {
-            "cod": "90101000299",
-            "desc": "PURE DE TOMATES 12X520G LC"
-        },
-        {
-            "cod": "50300602316",
-            "desc": "PURE.TOMATE.12X520.LC.SE"
-        },
-        {
-            "cod": "90101000019",
-            "desc": "PURE TOMATE TETRA NOEL 12X520G"
-        },
-        {
-            "cod": "90101006616",
-            "desc": "PULPA DE TOMATE SUAVE 12X520"
-        },
-        {
-            "cod": "90101000036",
-            "desc": "PULPA DE TOMATE SUAVE 12X520"
-        },
-        {
-            "cod": "90105041457",
-            "desc": "PURE TOMATE ARCOR 12X520 G ME"
-        },
-        {
-            "cod": "90101000296",
-            "desc": "PULPA DE TOMATE 12X520 G LC"
-        },
-        {
-            "cod": "90101001831",
-            "desc": "PULPA T.SALSATI 12X520 G"
-        },
-        {
-            "cod": "90101013109",
-            "desc": "PURE.TOMATE.ARCOR.12X1050G"
-        },
-        {
-            "cod": "90101013115",
-            "desc": "PURE.TOM.12X1020.CICA.UL"
-        }
+        {"cod": "90101006614", "desc": "PURE DE TOMATE ARCOR 12X520 GR"},
+        {"cod": "90101001832", "desc": "PURE T.SALSATI 12X520 G"},
+        {"cod": "50300600260", "desc": "PUR.TOM.TETRA.12X520.BLANCO"},
+        {"cod": "50300600236", "desc": "PURE.TOM.TETRA.12X520.BLANCO"},
+        {"cod": "90101000299", "desc": "PURE DE TOMATE LC 12X520 GR"},
+        {"cod": "50300602316", "desc": "PURE.TOMATE.12X520.LC.SE"},
+        {"cod": "90101000019", "desc": "PURE TOMATE TETRA NOEL"},
+        {"cod": "90101006616", "desc": "PULPA DE TOMATE SUAVE 12X520"},
+        {"cod": "90101000036", "desc": "PULPA DE TOMATE NOEL 12X520 GR"},
+        {"cod": "90105041457", "desc": "PURE DE TOMATE ARCOR 12X520 GR"},
+        {"cod": "90101000296", "desc": "PULPA DE TOMATE 12X520 G LC"},
+        {"cod": "90101001831", "desc": "PULPA T.SALSATI 12X520 G"},
+        {"cod": "90101013109", "desc": "PURE.TOMATE.ARCOR.12X1050G"},
+        {"cod": "90101013115", "desc": "PURE.TOM.12X1020.CICA.UL"}
     ],
     "PT": [
-        {
-            "cod": "90101005671",
-            "desc": "TOM.CUBETEADO ARCOR 2X12X400G"
-        },
-        {
-            "cod": "90101000039",
-            "desc": "TOMATE PEL.ENT.NOEL.2X12X400G"
-        },
-        {
-            "cod": "90101000241",
-            "desc": "TOM.PEL.PERIT.ENT.LC.2X12X400G"
-        },
-        {
-            "cod": "90101000245",
-            "desc": "TOM.PEL.PER.SALSATI 2X12X400G"
-        },
-        {
-            "cod": "90101000248",
-            "desc": "TOM.CUBET.SALSATI 2X12X400G"
-        },
-        {
-            "cod": "90101005679",
-            "desc": "TOMATE PEL.PER.2X12X400 G.ARCO"
-        },
-        {
-            "cod": "90101010594",
-            "desc": "TOM.CUBETEADO.LC.2X12X400G"
-        },
-        {
-            "cod": "90105040172",
-            "desc": "TOM.PEL.CARGIL.2X12X400.BRASIL"
-        },
-        {
-            "cod": "90105031935",
-            "desc": "TOM.PEL.L/C.2X12X400G.ANGELON"
-        },
-        {
-            "cod": "90105028888",
-            "desc": "TOMATE PEL.ENT.24X400 G.URUGUA"
-        },
-        {
-            "cod": "90101010912",
-            "desc": "TOMATE.PEL.ENTER.2X12X400G.S&P"
-        },
-        {
-            "cod": "90105031936",
-            "desc": "TOM.ENT.LC.2X12X400.A/F.ZAF.BR"
-        },
-        {
-            "cod": "90105040536",
-            "desc": "TOM.ENT.2X12X400 G.ARCOR.ECUAD"
-        },
-        {
-            "cod": "90105040823",
-            "desc": "TOM.CUBETEADO.2X12X400.CARGILL"
-        },
-        {
-            "cod": "50300205810",
-            "desc": "TOM.ENT.2X12X400.SABORES.VALL"
-        },
-        {
-            "cod": "90105040012",
-            "desc": "TOM.PEL.DIA%.2x12X400.BRASIL"
-        },
-        {
-            "cod": "90105031573",
-            "desc": "TOM.ENTER.LC.2X12X400G.URUG"
-        },
-        {
-            "cod": "90105041571",
-            "desc": "CHOPPED.TOMAT.2X12X400G.SUMMER"
-        },
-        {
-            "cod": "90105041900",
-            "desc": "TOM.ENT.COLOLO.2X12X400G.URUG"
-        },
-        {
-            "cod": "90105041573",
-            "desc": "TOM.ENTER.CARGILL.2X12X400G.AF"
-        }
+        {"cod": "90101005671", "desc": "TOM.CUBETEADO ARCOR 2X12X400G"},
+        {"cod": "90101000039", "desc": "TOMATE PEL.ENT.NOEL.2X12X400G"},
+        {"cod": "90101000241", "desc": "TOM.PEL.PERIT.ENT.LC.2X12X400G"},
+        {"cod": "90101000245", "desc": "TOM.PEL.PER.SALSATI 2X12X400G"},
+        {"cod": "90101000248", "desc": "TOM.CUBET.SALSATI 2X12X400G"},
+        {"cod": "90101005679", "desc": "TOMATE PEL.PER.2X12X400 G.ARCO"},
+        {"cod": "90101010594", "desc": "TOM.CUBETEADO.LC.2X12X400G"},
+        {"cod": "90105040172", "desc": "TOM.PEL.CARGIL.2X12X400.BRASIL"},
+        {"cod": "90105031935", "desc": "LA CAMPAGNOLA (Angeloni-Brasil)"},
+        {"cod": "90105028888", "desc": "TOM PELADO PERITAS ENT (Uruguay)"},
+        {"cod": "90101010912", "desc": "TOMATE.PEL.ENTER.2X12X400G.S&P"},
+        {"cod": "90105031936", "desc": "TOMATES ENT.PERITAS LC 24X400G"},
+        {"cod": "90105040536", "desc": "TOM.ENT.2X12X400 G.ARCOR.ECUAD"},
+        {"cod": "90105040823", "desc": "CUBETI.CARGIL.2X12X400G.BRASIL"},
+        {"cod": "50300205810", "desc": "TOM.ENT.2X12X400.SABORES.VALL"},
+        {"cod": "90105040012", "desc": "TOM.PEL.DIA%.24X400.BRASIL"},
+        {"cod": "90105031573", "desc": "TOMATE PEL.PERITA CAMPA.24X400"},
+        {"cod": "90105041571", "desc": "TOM.CUBET.CHOPPED.TOMAT 2X12X400"},
+        {"cod": "90105041900", "desc": "TOM.ENT.COLOLO.2X12X400G.URUG"},
+        {"cod": "90105041573", "desc": "TOM.ENTER.CARGILL.2X12X400G.AF"}
     ],
     "SE": [
-        {
-            "cod": "50300201692",
-            "desc": "TOM.CU.24X400.M.IN.SE"
-        },
-        {
-            "cod": "50300201686",
-            "desc": "TOM.EN.24X400.ME.IN"
-        },
-        {
-            "cod": "50300208561",
-            "desc": "TOM.ENT.EXPO.CAL+B.24X400G"
-        },
-        {
-            "cod": "50300102463",
-            "desc": "TO.ENT+PUR.8°BX.24X400.SALSATI"
-        },
-        {
-            "cod": "50300102462",
-            "desc": "TO.CUB+PUR.8°BX.24X400.SALSATI"
-        },
-        {
-            "cod": "50300205695",
-            "desc": "TOM.ENT.EXPO.CAL+A.24X400G"
-        },
-        {
-            "cod": "50300202362",
-            "desc": "TOM.ENT.A/F.EXPO.CAL+A.24X400G"
-        },
-        {
-            "cod": "50300201690",
-            "desc": "TOM.CUB.EXPO.CAL+A.24X400G"
-        },
-        {
-            "cod": "50300208553",
-            "desc": "TOM.ENT.A/F.EXPO.CAL+B.24X400G"
-        }
+        {"cod": "50300201692", "desc": "TOM.CU.24X400.M.IN.SE"},
+        {"cod": "50300201686", "desc": "TOM.EN.24X400.ME.IN"},
+        {"cod": "50300208561", "desc": "TOM.ENT.EXPO.CAL+B.24X400G"},
+        {"cod": "50300102463", "desc": "TO.ENT+PUR.8°BX.24X400.SALSATI"},
+        {"cod": "50300102462", "desc": "TO.CUB+PUR.8°BX.24X400.SALSATI"},
+        {"cod": "50300205695", "desc": "TOM.ENTERO 24x400g.EXPORTACION"},
+        {"cod": "50300202362", "desc": "TOMATE.ENTERO.+A/F.24X400G"},
+        {"cod": "50300201690", "desc": "TOMATE.CUBET.SE.24X400G.EXPORT"},
+        {"cod": "50300208553", "desc": "TOM.ENT.A/F.EXPO.CAL+B.24X400G"}
     ],
     "PASTAS": [
-        {
-            "cod": "50300407242",
-            "desc": "TOM.ENT.A/F.EXPO.CAL+B.24X400G"
-        },
-        {
-            "cod": "50300700354",
-            "desc": "PASTA.TOMATE.ENVASADA.29°BX"
-        },
-        {
-            "cod": "50300402239",
-            "desc": "EXTRAC.DOBLE.BOL.ASEPTICA.Z79"
-        },
-        {
-            "cod": "50300102709",
-            "desc": "CUBOS.TOMATE.ASEP.PURE.8°BX"
-        },
-        {
-            "cod": "50300409402",
-            "desc": "PASTA.TOMATE.TAMBOR.EXPO.CAL.A"
-        },
-        {
-            "cod": "50300709403",
-            "desc": "PASTA.TOMATE.PAMPA.EXP.CAL.A"
-        },
-        {
-            "cod": "50300104158",
-            "desc": "CUBOS.ASEP+PUR.15°B.MERM.5/8"
-        },
-        {
-            "cod": "50300408927",
-            "desc": "PASTA.TOMATE.TAMBOR.EXPO.CAL.B"
-        },
-        {
-            "cod": "50300708639",
-            "desc": "PASTA.TOMATE.PAMPA.EXPO.CAL.B"
-        },
-        {
-            "cod": "50300408694",
-            "desc": "EXTRAC.DOBLE.BOL.ASEPTICA.24BX"
-        },
-        {
-            "cod": "50300710031",
-            "desc": "SE.PURE.TOMATE.10BX.PASSATA"
-        },
-        {
-            "cod": "90204616538",
-            "desc": "PASTA.TOM.TAMB.CAL.A.30-32BX"
-        }
+        {"cod": "50300407242", "desc": "PASTA.TOM.BOL.ASEP.PAMPA.BULK"},
+        {"cod": "50300700354", "desc": "PASTA.TOMATE.ENVASADA.29°BX"},
+        {"cod": "50300402239", "desc": "EXTRAC.DOBLE.BOL.ASEPTICA.Z79"},
+        {"cod": "50300102709", "desc": "CUBOS.TOMATE.ASEP.PURE.8°BX"},
+        {"cod": "50300409402", "desc": "PASTA.TOMATE.TAMBOR.EXPO.CAL.A"},
+        {"cod": "50300709403", "desc": "PASTA.TOMATE.PAMPA.EXP.CAL.A"},
+        {"cod": "50300104158", "desc": "CUBOS.ASEP+PUR.15°B.MERM.5/8"},
+        {"cod": "50300408927", "desc": "PASTA.TOMATE.TAMBOR.EXPO.CAL.B"},
+        {"cod": "50300708639", "desc": "PASTA.TOMATE.PAMPA.EXPO.CAL.B"},
+        {"cod": "50300408694", "desc": "EXTRAC.DOBLE.BOL.ASEPTICA.24BX"},
+        {"cod": "50300710031", "desc": "SE.PURE.TOMATE.10BX.PASSATA"},
+        {"cod": "90204616538", "desc": "PASTA.TOM.TAMB.CAL.A.30-32BX"}
     ]
 }

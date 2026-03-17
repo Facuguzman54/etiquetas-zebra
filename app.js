@@ -35,6 +35,8 @@ function cambiarTab(evt, nombreTab) {
 
     const controlesExtra = document.getElementById('controles-extra');
     controlesExtra.style.display = (nombreTab === 'tabModoIC') ? 'none' : 'flex';
+
+    validar();
 }
 
 /* ==========================================================================
@@ -61,7 +63,7 @@ window.onload = async () => {
     }
 
     document.getElementById('copias').addEventListener('input', validarSeguridad);
-    validarSeguridad();
+    validar();
 };
 
 function popularDatalistIC() {
@@ -117,6 +119,70 @@ function validarSeguridad() {
         inputCopias.style.borderColor = "var(--border-color)";
         btnImprimir.disabled = false;
         btnImprimir.innerText = "IMPRIMIR ETIQUETA";
+    }
+}
+
+function aplicarReglasTextoEtiquetaLibre() {
+    const textarea = document.getElementById('textoEtiqueta');
+    const size = parseInt(document.getElementById('tamano').value);
+    if (!textarea) return;
+
+    if (size === 210) {
+        // Extra Grande: una sola linea de hasta 15 caracteres.
+        textarea.value = textarea.value.replace(/[\r\n]+/g, ' ');
+        textarea.maxLength = 15;
+    } else {
+        textarea.removeAttribute('maxlength');
+    }
+}
+
+function actualizarFeedbackEtiquetaLibre() {
+    const textarea = document.getElementById('textoEtiqueta');
+    const statusEtiqueta = document.getElementById('statusEtiqueta');
+    if (!textarea || !statusEtiqueta) return;
+
+    if (modoActual !== 'tabEtiquetaLibre') {
+        statusEtiqueta.innerText = '';
+        textarea.style.borderColor = 'var(--border-color)';
+        return;
+    }
+
+    const size = parseInt(document.getElementById('tamano').value);
+    if (size === 210) {
+        const largo = textarea.value.length;
+        const llegoLimite = largo >= 15;
+        textarea.placeholder = 'EXTRA GRANDE: UNA LINEA, MAX 15';
+        statusEtiqueta.innerText = llegoLimite
+            ? 'Limite alcanzado: 15 caracteres en Extra Grande.'
+            : `Extra Grande: ${largo}/15 caracteres (sin saltos de linea).`;
+        statusEtiqueta.style.color = llegoLimite ? 'var(--error-color)' : 'var(--text-label)';
+        textarea.style.borderColor = llegoLimite ? 'var(--error-color)' : 'var(--border-color)';
+        return;
+    }
+
+    textarea.placeholder = 'ESCRIBA AQUI...';
+    statusEtiqueta.innerText = 'Saltos de linea permitidos.';
+    statusEtiqueta.style.color = 'var(--text-label)';
+    textarea.style.borderColor = 'var(--border-color)';
+}
+
+function validar() {
+    const btnImprimir = document.getElementById('btnImprimir');
+
+    // Mantiene la validacion de copias para todos los modos.
+    validarSeguridad();
+
+    // En modo etiqueta libre, exige contenido para habilitar impresion.
+    if (modoActual === 'tabEtiquetaLibre') {
+        aplicarReglasTextoEtiquetaLibre();
+        actualizarFeedbackEtiquetaLibre();
+        const texto = document.getElementById('textoEtiqueta').value.trim();
+        if (!texto) {
+            btnImprimir.disabled = true;
+            btnImprimir.innerText = 'INGRESE CONTENIDO';
+        }
+    } else {
+        actualizarFeedbackEtiquetaLibre();
     }
 }
 
@@ -265,14 +331,52 @@ function generarZPL() {
    ========================================================================== */
 function mostrarPreview() {
     const zpl = generarZPL();
+    const img = document.getElementById('labelaryImage');
+    const spinner = document.getElementById('previewSpinner');
+    const placeholder = document.getElementById('previewPlaceholder');
+
+    img.classList.add('hidden');
+    spinner.classList.add('hidden');
+    placeholder.classList.add('hidden');
+
+    if (!zpl || !zpl.trim()) {
+        placeholder.innerText = 'No hay contenido para previsualizar. Complete los campos antes de abrir la vista previa.';
+        placeholder.classList.remove('hidden');
+        document.getElementById('modalPreview').classList.remove('hidden');
+        return;
+    }
+
+    spinner.classList.remove('hidden');
+    img.onload = () => {
+        spinner.classList.add('hidden');
+        placeholder.classList.add('hidden');
+        img.classList.remove('hidden');
+    };
+    img.onerror = () => {
+        spinner.classList.add('hidden');
+        img.classList.add('hidden');
+        placeholder.innerText = 'No se pudo cargar la vista previa. Revise el contenido de la etiqueta e intente nuevamente.';
+        placeholder.classList.remove('hidden');
+    };
+
     const url = `http://api.labelary.com/v1/printers/8dpmm/labels/4x6/0/${encodeURIComponent(zpl)}`;
-    document.getElementById('labelaryImage').src = url;
+    img.src = url;
     document.getElementById('modalPreview').classList.remove('hidden');
 }
 
 function cerrarPreview() {
+    const img = document.getElementById('labelaryImage');
+    const spinner = document.getElementById('previewSpinner');
+    const placeholder = document.getElementById('previewPlaceholder');
+
+    img.onload = null;
+    img.onerror = null;
+    spinner.classList.add('hidden');
+    placeholder.classList.add('hidden');
+    img.classList.remove('hidden');
+
     document.getElementById('modalPreview').classList.add('hidden');
-    document.getElementById('labelaryImage').src = "";
+    img.src = "";
 }
 
 async function imprimir() {
@@ -282,11 +386,27 @@ async function imprimir() {
 
     if (!ip) return alert("Seleccione impresora");
 
+    if (modoActual === 'tabModoIC') {
+        const confirmar = confirm('IMPORTANTE: Estas etiquetas NO reemplazan la declaracion de productos por JDE. ¿Desea continuar con la impresion?');
+        if (!confirmar) return;
+    }
+
     let textoHist = modoActual === 'tabEtiquetaLibre' ? 
         document.getElementById('textoEtiqueta').value : 
         `IC: ${document.getElementById('icItem').value}`;
 
-    guardarEnHistorial({ ip, texto: textoHist });
+    const tipoHist = modoActual === 'tabEtiquetaLibre' ? 'ETIQUETA' : 'IC';
+    const datosIC = modoActual === 'tabModoIC'
+        ? {
+            item: document.getElementById('icItem').value,
+            lote: document.getElementById('icLote').value,
+            cantidad: document.getElementById('icCantidad').value,
+            wo: document.getElementById('icWO').value,
+            vto: document.getElementById('icVto').value
+        }
+        : null;
+
+    guardarEnHistorial({ ip, texto: textoHist, tipo: tipoHist, datosIC });
 
     let zplFinal = generarZPL().replace('^XZ', `^PQ${copias}^XZ`);
     status.style.display = "block";
@@ -311,26 +431,124 @@ function toggleSidebar() {
     renderizarHistorial();
 }
 
+function activarTabProgramaticamente(nombreTab) {
+    cambiarTab(null, nombreTab);
+    const botones = document.querySelectorAll('.tab-btn');
+    botones.forEach(btn => {
+        const esTabActiva = btn.getAttribute('onclick')?.includes(`'${nombreTab}'`);
+        btn.classList.toggle('active', !!esTabActiva);
+    });
+}
+
 function guardarEnHistorial(datos) {
     if (!datos.texto) return;
-    historial.unshift({ id: Date.now(), fecha: new Date().toLocaleTimeString(), ...datos });
+    historial.unshift({
+        id: Date.now(),
+        fecha: new Date().toLocaleTimeString(),
+        fijada: false,
+        ...datos
+    });
     historial = historial.slice(0, 10);
     localStorage.setItem('historial', JSON.stringify(historial));
+}
+
+function persistirHistorial() {
+    localStorage.setItem('historial', JSON.stringify(historial));
+}
+
+function eliminarCardHistorial(id) {
+    historial = historial.filter(item => item.id !== id);
+    persistirHistorial();
+    renderizarHistorial();
+}
+
+function fijarCardHistorial(id) {
+    historial = historial.map(item => item.id === id ? { ...item, fijada: !item.fijada } : item);
+    historial.sort((a, b) => {
+        const aFijada = !!a.fijada;
+        const bFijada = !!b.fijada;
+        if (aFijada !== bFijada) return aFijada ? -1 : 1;
+        return b.id - a.id;
+    });
+    persistirHistorial();
+    renderizarHistorial();
 }
 
 function renderizarHistorial() {
     const lista = document.getElementById('historial-lista');
     lista.innerHTML = '';
-    historial.forEach(item => {
+    const historialOrdenado = [...historial].sort((a, b) => {
+        const aFijada = !!a.fijada;
+        const bFijada = !!b.fijada;
+        if (aFijada !== bFijada) return aFijada ? -1 : 1;
+        return b.id - a.id;
+    });
+
+    historialOrdenado.forEach(item => {
+        const tipo = item.tipo || (item.texto?.startsWith('IC: ') ? 'IC' : 'ETIQUETA');
         const card = document.createElement('div');
         card.className = 'mini-card';
-        card.innerHTML = `<h4>${item.fecha}</h4><p>${item.texto.substring(0, 30)}...</p>`;
+        if (item.fijada) card.classList.add('mini-card-fijada');
+        card.innerHTML = `
+            <div class="mini-card-top">
+                <h4>${item.fecha} | ${tipo}</h4>
+                <div class="mini-card-actions">
+                    <button class="mini-card-btn" title="Fijar" aria-label="Fijar">${item.fijada ? '📌' : '📍'}</button>
+                    <button class="mini-card-btn" title="Borrar" aria-label="Borrar">✖️</button>
+                </div>
+            </div>
+            <p>${item.texto.substring(0, 30)}...</p>`;
+
+        const btnFijar = card.querySelector('.mini-card-actions .mini-card-btn:nth-child(1)');
+        const btnBorrar = card.querySelector('.mini-card-actions .mini-card-btn:nth-child(2)');
+
+        btnFijar.addEventListener('click', (event) => {
+            event.stopPropagation();
+            fijarCardHistorial(item.id);
+        });
+
+        btnBorrar.addEventListener('click', (event) => {
+            event.stopPropagation();
+            eliminarCardHistorial(item.id);
+        });
+
+        card.addEventListener('click', () => cargarDesdeHistorial(item));
         lista.appendChild(card);
     });
 }
 
+function cargarDesdeHistorial(item) {
+    if (!item || !item.texto) return;
+
+    if (item.tipo === 'IC' || item.texto.startsWith('IC: ')) {
+        activarTabProgramaticamente('tabModoIC');
+        const inputItem = document.getElementById('icItem');
+        const inputLote = document.getElementById('icLote');
+        const inputCantidad = document.getElementById('icCantidad');
+        const inputWO = document.getElementById('icWO');
+        const inputVto = document.getElementById('icVto');
+
+        const codigo = item.datosIC?.item || item.texto.replace('IC: ', '').trim();
+        inputItem.value = codigo;
+        inputLote.value = item.datosIC?.lote || '';
+        inputCantidad.value = item.datosIC?.cantidad || '';
+        inputWO.value = item.datosIC?.wo || '';
+        inputVto.value = item.datosIC?.vto || '';
+        autoCompletarDescripcion();
+        return;
+    }
+
+    activarTabProgramaticamente('tabEtiquetaLibre');
+    document.getElementById('textoEtiqueta').value = item.texto;
+    validar();
+}
+
 function limpiarHistorial() {
-    historial = [];
-    localStorage.removeItem('historial');
+    historial = historial.filter(item => !!item.fijada);
+    if (historial.length === 0) {
+        localStorage.removeItem('historial');
+    } else {
+        persistirHistorial();
+    }
     renderizarHistorial();
 }

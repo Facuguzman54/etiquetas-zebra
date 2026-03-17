@@ -299,6 +299,16 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
     transition: all 0.2s ease; /* Para que aparezca suave */
 }
 
+#statusEtiqueta {
+    margin-top: -6px;
+    margin-bottom: 10px;
+    min-height: 18px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--disabled-text);
+    transition: color 0.2s ease;
+}
+
 /* ==========================================================================
    8. UTILIDADES Y FOOTER
    ========================================================================== */
@@ -362,12 +372,35 @@ footer {
     overflow-y: auto; /* Scroll tipo PDF */
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Empieza desde arriba */
+    align-items: center;
+    flex-direction: column;
     background: #525659; /* Gris oscuro tipo lector de PDF */
     margin: 15px 0;
     padding: 20px;
     border-radius: 4px;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+}
+
+.preview-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.25);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: giroPreview 0.8s linear infinite;
+}
+
+.preview-placeholder {
+    color: #f2f2f2;
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-align: center;
+    max-width: 320px;
+    line-height: 1.35;
+}
+
+@keyframes giroPreview {
+    to { transform: rotate(360deg); }
 }
 
 #labelaryImage {
@@ -485,6 +518,26 @@ footer {
     box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.1);
 }
 
+.alerta-ic {
+    background: var(--warning-bg);
+    border: 2px solid #ffb703;
+    color: #7a4600;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 14px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+[data-theme="dark"] .alerta-ic {
+    background: #3b3212;
+    border-color: #f4a261;
+    color: #ffd89b;
+}
+
 /* Responsividad para móviles (una sola columna) */
 @media (max-width: 480px) {
     .form-ic-grid {
@@ -495,4 +548,30 @@ footer {
         font-size: 0.8rem;
         padding: 12px 5px;
     }
+}
+
+.mini-card-fijada {
+    border-color: #f4a261;
+    box-shadow: inset 0 0 0 1px rgba(244, 162, 97, 0.35);
+}
+
+.mini-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.mini-card-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.mini-card-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    line-height: 1;
 }

@@ -100,9 +100,13 @@
 
                     <label>CONTENIDO DE LA ETIQUETA</label>
                     <textarea id="textoEtiqueta" placeholder="ESCRIBA AQUÍ..." oninput="validar()"></textarea>
+                    <div id="statusEtiqueta"></div>
                 </div>
 
-<!-- <div id="tabModoIC" class="tab-content">
+<div id="tabModoIC" class="tab-content">
+    <div class="alerta-ic" role="alert">
+        IMPORTANTE: Estas etiquetas NO reemplazan la declaracion de productos por JDE.
+    </div>
     <div class="form-ic-grid">
         <div class="input-group">
             <label for="icItem">Producto / Código</label>
@@ -135,7 +139,7 @@
         </div>
         
         </div>
-</div> -->
+</div>
             </div>
         </div>
         <div id="status"></div>
@@ -193,6 +197,8 @@
         <div class="modal-content preview-content">
             <h3>VISTA PREVIA</h3>
             <div id="previewContainer">
+                <div id="previewSpinner" class="preview-spinner hidden" aria-hidden="true"></div>
+                <div id="previewPlaceholder" class="preview-placeholder hidden"></div>
                 <img id="labelaryImage" src="" alt="Cargando etiqueta...">
             </div>
             <button onclick="cerrarPreview()" class="btn-cancelar">CERRAR</button>
@@ -200,6 +206,5 @@
     </div>
     <script src="app.js"></script>
 </body>
-
 
 </html>

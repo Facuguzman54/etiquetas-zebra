@@ -837,7 +837,7 @@ async function imprimir() {
     let zplFinal = generarZPL().replace('^XZ', `^PQ${copias}^XZ`);
     
     // Validar tamaño del ZPL para prevenir saturación de buffer
-    if (zplFinal.length > 1080000) {
+    if (zplFinal.length > 80000) { //1080000
         status.style.display = "block";
         status.innerText = "❌ ZPL demasiado grande (" + Math.floor(zplFinal.length / 1024) + "KB). Usa imagen más pequeña.";
         status.style.color = "red";

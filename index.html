@@ -65,6 +65,7 @@
             <div class="tab-header">
                 <button class="tab-btn active" onclick="cambiarTab(event, 'tabEtiquetaLibre')">MODO ETIQUETA</button>
                 <button class="tab-btn" onclick="cambiarTab(event, 'tabModoIC')">MODO IC</button>
+                <button class="tab-btn" onclick="cambiarTab(event, 'tabModoImagen')">MODO IMAGEN</button>
             </div>
 
             <div class="tab-body">
@@ -140,11 +141,77 @@
         
         </div>
 </div>
+
+<div id="tabModoImagen" class="tab-content">
+    <div class="alerta-ic" role="alert">
+        Cargue una imagen para imprimirla en la etiqueta. Tamaño recomendado: 300x400px
+    </div>
+    <div class="form-ic-grid">
+        <div class="input-group">
+            <label for="imagenFile">Seleccione Imagen</label>
+            <input type="file" id="imagenFile" accept="image/*" onchange="cargarImagen()">
+            <small style="color: var(--text-label); font-size: 0.65rem;">Formatos: JPG, PNG, GIF</small>
+        </div>
+
+        <div class="input-group">
+            <label for="escalaImagen">Escala (%)</label>
+            <input type="range" id="escalaImagen" min="20" max="200" value="100" oninput="actualizarPreviewImagen()" style="width: 100%;">
+            <small id="escalaDisplay" style="color: var(--primary-color); font-size: 0.65rem; display: block; text-align: center;">100%</small>
+        </div>
+
+        <div class="input-group">
+            <label for="posicionX">Posición Horizontal</label>
+            <input type="range" id="posicionX" min="0" max="812" value="406" oninput="actualizarPreviewImagen()" style="width: 100%;">
+            <small id="posicionXDisplay" style="color: var(--text-label); font-size: 0.65rem; display: block; text-align: center;">Centro</small>
+        </div>
+
+        <div class="input-group">
+            <label for="posicionY">Posición Vertical</label>
+            <input type="range" id="posicionY" min="0" max="1218" value="609" oninput="actualizarPreviewImagen()" style="width: 100%;">
+            <small id="posicionYDisplay" style="color: var(--text-label); font-size: 0.65rem; display: block; text-align: center;">Centro</small>
+        </div>
+
+        <div class="input-group">
+            <label for="rotacionImagen">Rotación</label>
+            <select id="rotacionImagen" onchange="actualizarPreviewImagen()">
+                <option value="0">0°</option>
+                <option value="90">90°</option>
+                <option value="180">180°</option>
+                <option value="270">270°</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Preview proporcional 4"×6" (812×1218 dots) — se actualiza en tiempo real -->
+    <div id="previewImagenContainer" style="display:none; margin-top: 20px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+            <small style="font-weight:700; color:var(--text-label); font-size:0.72rem; text-transform:uppercase; letter-spacing:.5px;">Vista Previa (4″×6″)</small>
+            <small id="previewSizeInfo" style="color:var(--disabled-text); font-size:0.68rem;"></small>
+        </div>
+        <div id="previewEtiquetaWrapper" style="
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 12px var(--shadow);
+        ">
+            <!-- El canvas se crea con JS con aspect-ratio 812/1218 -->
+            <canvas id="previewCanvas" style="display:block; width:100%; height:auto;"></canvas>
+        </div>
+        <small style="display:block; text-align:center; margin-top:6px; color:var(--disabled-text); font-size:0.65rem;">
+            ⚙️ Procesando al soltar el slider...
+        </small>
+    </div>
+
             </div>
         </div>
         <div id="status"></div>
 
- <div class="row" id="controles-extra">
+ <div class="row" id="controles-extra" style="margin: 10px;">
     <div>
         <label>TAMAÑO</label>
         <select id="tamano" onchange="validar()">
@@ -188,7 +255,7 @@
         </div>
     </div>
 
-    <footer>Hecho por Facu - v4.0</footer>
+    <footer>Hecho por Facu - v4.5</footer>
     <button class="preview-btn" onclick="mostrarPreview()" title="Vista Previa">
         <span id="eye-icon">👁️</span>
     </button>

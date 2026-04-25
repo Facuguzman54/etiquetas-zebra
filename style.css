@@ -575,3 +575,61 @@ footer {
     font-size: 0.9rem;
     line-height: 1;
 }
+
+/* ==========================================================================
+   PREVIEW DE IMAGEN (MODO IMAGEN)
+   ========================================================================== */
+.preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-section);
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 220px;
+}
+
+.preview-container img {
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+.input-group select {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 0.875rem;
+}
+/* ==========================================================================
+   PREVIEW CANVAS ETIQUETA (4"×6" proporcional)
+   ========================================================================== */
+#previewImagenContainer {
+    margin-top: 20px;
+}
+
+#previewEtiquetaWrapper {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 12px var(--shadow);
+    /* Aspect ratio 812/1218 ≈ 0.667 (4"×6") se respeta porque el canvas lo impone */
+}
+
+#previewCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* Render nítido: sin suavizado del navegador al escalar el canvas */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}

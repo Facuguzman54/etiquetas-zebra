@@ -633,3 +633,89 @@ footer {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
 }
+
+/* ==========================================================================
+   DRAG & DROP ZONE (MODO IMAGEN)
+   ========================================================================== */
+.drop-zone {
+    margin-top: 16px;
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--bg-section);
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+    border-color: var(--primary-color);
+    background: rgba(0, 86, 179, 0.05);
+}
+
+.drop-zone.drag-over {
+    border-style: solid;
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
+}
+
+.drop-zone-inner {
+    pointer-events: none;
+}
+
+.drop-zone-icon {
+    font-size: 2.2rem;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.drop-zone p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-label);
+    line-height: 1.5;
+}
+
+.drop-zone kbd {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.78rem;
+    font-family: monospace;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* Cuando ya hay imagen cargada, la drop zone se achica como zona secundaria */
+.drop-zone.tiene-imagen {
+    padding: 10px;
+    border-style: dashed;
+    opacity: 0.6;
+}
+
+.drop-zone.tiene-imagen p {
+    font-size: 0.72rem;
+}
+
+.drop-zone.tiene-imagen .drop-zone-icon {
+    font-size: 1.2rem;
+    margin-bottom: 3px;
+}
+
+/* Indicador paste-flash: parpadeo cuando se pega con Ctrl+V */
+@keyframes pasteFlash {
+    0%   { box-shadow: 0 0 0 3px rgba(0, 179, 100, 0.6); border-color: #00b364; }
+    100% { box-shadow: none; border-color: var(--border-color); }
+}
+.drop-zone.paste-flash {
+    animation: pasteFlash 0.5s ease-out forwards;
+}
+
+/* Drop zone unificada — link interno */
+.drop-zone-link {
+    color: var(--primary-color);
+    font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+}

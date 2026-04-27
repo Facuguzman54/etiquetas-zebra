@@ -71,6 +71,7 @@ window.onload = async () => {
     }
 
     document.getElementById('copias').addEventListener('input', validarSeguridad);
+    initDropZone();
     validar();
 };
 
@@ -374,19 +375,29 @@ async function cargarImagen() {
     const input = document.getElementById('imagenFile');
     const file = input.files[0];
     if (!file) return;
+    await procesarArchivoImagen(file);
+}
 
+/* Procesa un File/Blob de imagen — punto único para input, drop y paste */
+async function procesarArchivoImagen(file) {
+    if (!file || !file.type.startsWith('image/')) {
+        alert('El archivo no es una imagen válida.');
+        return;
+    }
     const reader = new FileReader();
     reader.onload = async (e) => {
         const img = new Image();
         img.onload = async () => {
-            imagenActual = {
-                src: e.target.result,
-                file: file,
-                procesando: true
-            };
+            imagenActual = { src: e.target.result, file, procesando: true };
             actualizarPreviewImagen();
-            
-            // Procesamiento local inmediato
+            // Marcar la drop zone como "tiene imagen"
+            const dz = document.getElementById('dropZone');
+            if (dz) {
+                dz.classList.add('tiene-imagen');
+                dz.querySelector('p').innerHTML =
+                    `<strong>${file.name || 'Imagen pegada'}</strong><br>Soltá otra para reemplazar`;
+                dz.querySelector('.drop-zone-icon').textContent = '✅';
+            }
             try {
                 const resultado = await procesarImagenALocal(img);
                 imagenActual.zplGraphics = resultado.gfa;
@@ -396,14 +407,104 @@ async function cargarImagen() {
                 console.log(`✅ Imagen convertida (${resultado.dotW}×${resultado.dotH} dots). Tamaño: ${Math.round(resultado.gfa.length / 1024)}KB`);
                 validar();
             } catch (err) {
-                console.error("Error en proceso local:", err);
-                alert("Error al procesar la imagen localmente.");
+                console.error('Error en proceso local:', err);
+                alert('Error al procesar la imagen localmente.');
             }
         };
         img.src = e.target.result;
     };
     reader.readAsDataURL(file);
 }
+
+/* Umbral de binarización: actualiza el label y reprocesa con debounce */
+function onUmbralChange() {
+    const val = parseInt(document.getElementById('umbralBinarizacion').value);
+    const display = document.getElementById('umbralDisplay');
+    let label = '';
+    if (val <= 60)      label = 'Muy Claro';
+    else if (val <= 70) label = 'Claro';
+    else if (val <= 80) label = 'Óptimo alta resolución';
+    else if (val <= 90) label = 'Oscuro';
+    else                label = 'Muy Oscuro';
+    display.innerText = `${val}% — ${label}`;
+
+    // Preview visual INMEDIATO (solo redibuja el canvas con filtro CSS)
+    if (imagenActual?.src) {
+        const escala   = parseInt(document.getElementById('escalaImagen').value) / 100;
+        const posX     = parseInt(document.getElementById('posicionX').value);
+        const posY     = parseInt(document.getElementById('posicionY').value);
+        const rotacion = parseInt(document.getElementById('rotacionImagen').value);
+        dibujarPreviewCanvas(escala, posX, posY, rotacion);
+    }
+
+    if (!imagenActual?.src) return;
+    // Reprocesar el GFA con el nuevo umbral (con debounce para no saturar)
+    debounceGFA(() => {
+        const imgEl = new Image();
+        imgEl.onload = async () => {
+            const resultado = await procesarImagenALocal(imgEl);
+            if (imagenActual) {
+                imagenActual.zplGraphics = resultado.gfa;
+                imagenActual.zplGraphicsCurrent = null;
+                validar();
+                const info = document.getElementById('previewSizeInfo');
+                if (info) {
+                    const escala = parseInt(document.getElementById('escalaImagen').value) / 100;
+                    let iW = Math.min(Math.round(resultado.dotW * escala), 812);
+                    let iH = Math.min(Math.round(resultado.dotH * escala), 1218);
+                    info.innerText = `${iW}×${iH} dots · ZPL ~${Math.round(resultado.gfa.length / 1024)}KB`;
+                }
+            }
+        };
+        imgEl.src = imagenActual.src;
+    }, 500);
+}
+
+/* ── Drag & Drop ─────────────────────────────────────────────────────────── */
+function initDropZone() {
+    const dz = document.getElementById('dropZone');
+    if (!dz) return;
+
+    dz.addEventListener('click', () => document.getElementById('imagenFile').click());
+
+    dz.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dz.classList.add('drag-over');
+    });
+    dz.addEventListener('dragleave', (e) => {
+        if (!dz.contains(e.relatedTarget)) dz.classList.remove('drag-over');
+    });
+    dz.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        dz.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) await procesarArchivoImagen(file);
+    });
+}
+
+/* ── Ctrl+V desde portapapeles (solo en tab Modo Imagen) ─────────────────── */
+document.addEventListener('paste', async (e) => {
+    if (modoActual !== 'tabModoImagen') return;
+
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+        if (item.type.startsWith('image/')) {
+            const file = item.getAsFile();
+            if (file) {
+                // Flash visual en la drop zone
+                const dz = document.getElementById('dropZone');
+                if (dz) {
+                    dz.classList.add('paste-flash');
+                    setTimeout(() => dz.classList.remove('paste-flash'), 500);
+                }
+                await procesarArchivoImagen(file);
+            }
+            break;
+        }
+    }
+});
 /* Reconstruye el bitmap del GFA aplicando escala y rotación en canvas.
    baseW/baseH son las dimensiones reales en dots de la imagen original. */
 function aplicarEscalaYRotacionAGFA(gfaOriginal, escala, rotacionGrados, baseW, baseH) {
@@ -563,6 +664,9 @@ async function procesarImagenALocal(img, escalaForzada = 1, rotacionForzada = 0)
     const pixels = fCtx.getImageData(0, 0, canvasW, canvasH).data;
     const BLOCK = 20;
     const luma = (i) => pixels[i] * 0.299 + pixels[i+1] * 0.587 + pixels[i+2] * 0.114;
+    // Umbral desde el slider (50–100). Valor más bajo = más oscuro/agresivo.
+    const umbralSlider = document.getElementById('umbralBinarizacion');
+    const umbralActual = umbralSlider ? parseInt(umbralSlider.value) : 70;
 
     const bytesPerRow = Math.ceil(canvasW / 8);
     let hexData = "";
@@ -587,7 +691,7 @@ async function procesarImagenALocal(img, escalaForzada = 1, rotacionForzada = 0)
                         count++;
                     }
                 }
-                const umbral = (sum / count) * 0.85;
+                const umbral = (sum / count) * (umbralActual / 100);
                 if (luma((y * canvasW + px) * 4) < umbral) byte |= (1 << (7 - bit));
             }
             rowHex += byte.toString(16).padStart(2, '0').toUpperCase();
@@ -681,7 +785,16 @@ function dibujarPreviewCanvas(escala, posX, posY, rotacion) {
         ctx.save();
         ctx.translate(foX + iW / 2, foY + iH / 2);
         ctx.rotate((rotacion * Math.PI) / 180);
+        // Leer umbral actual para aplicar filtro visual aproximado
+        // El umbral bajo (50) = más oscuro → más contraste; alto (100) = más claro
+        const umbralVal = parseInt(document.getElementById('umbralBinarizacion')?.value || 70);
+        // Mapear umbral 50–100 a contrast 300%–80% y brightness 0.6–1.2
+        const contrastPct = Math.round(300 - (umbralVal - 50) * 4.4);   // 50→300%, 100→80%
+        const brightMult  = (0.6 + (umbralVal - 50) * 0.012).toFixed(2); // 50→0.60, 100→1.20
+        ctx.filter = `contrast(${contrastPct}%) brightness(${brightMult})`;
+
         ctx.drawImage(imgEl, -origW / 2, -origH / 2, origW, origH);
+        ctx.filter = 'none';
         ctx.restore();
 
         // Borde de recorte de etiqueta (lo que se imprime)
@@ -837,7 +950,7 @@ async function imprimir() {
     let zplFinal = generarZPL().replace('^XZ', `^PQ${copias}^XZ`);
     
     // Validar tamaño del ZPL para prevenir saturación de buffer
-    if (zplFinal.length > 80000) { //1080000
+    if (zplFinal.length > 1080000) { //antes 80000
         status.style.display = "block";
         status.innerText = "❌ ZPL demasiado grande (" + Math.floor(zplFinal.length / 1024) + "KB). Usa imagen más pequeña.";
         status.style.color = "red";

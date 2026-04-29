@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Generador Zebra - Arcor v4.0</title>
+    <title>Generador Zebra - Arcor v5.0</title>
 
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://images.icon-icons.com/1446/PNG/512/22229zebra_98835.png">
@@ -46,12 +46,34 @@
 
         <div class="row">
             <div>
-                <label>IMPRESORA</label>
+                <label style="display:flex; align-items:center; gap:8px;">
+                    IMPRESORA
+                    <span id="printerStatus" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        font-size: 0.65rem;
+                        font-weight: 600;
+                        color: var(--disabled-text);
+                        text-transform: none;
+                        letter-spacing: 0;
+                    ">
+                        <span id="printerStatusDot" style="
+                            width: 8px; height: 8px;
+                            border-radius: 50%;
+                            background: var(--disabled-text);
+                            display: inline-block;
+                            transition: background 0.3s;
+                        "></span>
+                        <span id="printerStatusText">Sin seleccionar</span>
+                    </span>
+                </label>
                 <select id="printerIp" onchange="verificarPasswordImpresora()">
                     <option value="" disabled selected>-- SELECCIONAR IMPRESORA --</option>
                     <option value="10.54.204.171">CONSERVAS</option>
                     <option value="10.54.204.152">PASTA</option>
                     <option value="10.54.204.151">ETIQUETADO</option>
+                    <option value="10.54.204.153">ETIQUETADO (G8)</option>
                     <option value="" disabled>FEM (proximamente...)</option>
                 </select>
             </div>
@@ -66,6 +88,7 @@
                 <button class="tab-btn active" onclick="cambiarTab(event, 'tabEtiquetaLibre')">MODO ETIQUETA</button>
                 <button class="tab-btn" onclick="cambiarTab(event, 'tabModoIC')">MODO IC</button>
                 <button class="tab-btn" onclick="cambiarTab(event, 'tabModoImagen')">MODO IMAGEN</button>
+                <button class="tab-btn tab-btn-g8 hidden" onclick="cambiarTab(event, 'tabModoG8')">MODO G8</button>
             </div>
 
             <div class="tab-body">
@@ -104,112 +127,127 @@
                     <div id="statusEtiqueta"></div>
                 </div>
 
-<div id="tabModoIC" class="tab-content">
-    <div class="alerta-ic" role="alert">
-        IMPORTANTE: Estas etiquetas NO reemplazan la declaracion de productos por JDE.
-    </div>
-    <div class="form-ic-grid">
-        <div class="input-group">
-            <label for="icItem">Producto / Código</label>
-            <input type="text" id="icItem" list="listaProductosIC" 
-                   placeholder="Buscar o digitar código..." 
-                   oninput="autoCompletarDescripcion()">
-            <datalist id="listaProductosIC"></datalist>
-            <small id="icDescDisplay" style="color: var(--primary-color); font-size: 0.7rem; font-weight: bold; min-height: 1.2em; display: block;"></small>
-        </div>
+                <div id="tabModoIC" class="tab-content">
+                    <div class="alerta-ic" role="alert">
+                        IMPORTANTE: Estas etiquetas NO reemplazan la declaracion de productos por JDE.
+                    </div>
+                    <div class="form-ic-grid">
+                        <div class="input-group">
+                            <label for="icItem">Producto / Código</label>
+                            <input type="text" id="icItem" list="listaProductosIC"
+                                placeholder="Buscar o digitar código..." oninput="autoCompletarDescripcion()">
+                            <datalist id="listaProductosIC"></datalist>
+                            <small id="icDescDisplay"
+                                style="color: var(--primary-color); font-size: 0.7rem; font-weight: bold; min-height: 1.2em; display: block;"></small>
+                        </div>
 
-        <div class="input-group">
-            <label for="icLote">Lote (Se completará a 12 dígitos)</label>
-            <input type="text" id="icLote" placeholder="Ej: 35545957" maxlength="12">
-            <small id="loteHelper" style="color: var(--disabled-text); font-size: 0.65rem;">Se añadirán ceros automáticamente al inicio.</small>
-        </div>
+                        <div class="input-group">
+                            <label for="icLote">Lote (Se completará a 12 dígitos)</label>
+                            <input type="text" id="icLote" placeholder="Ej: 35545957" maxlength="12">
+                            <small id="loteHelper" style="color: var(--disabled-text); font-size: 0.65rem;">Se añadirán
+                                ceros automáticamente al inicio.</small>
+                        </div>
 
-        <div class="input-group">
-            <label for="icCantidad">Cantidad</label>
-            <input type="number" id="icCantidad" placeholder="Ej: 52">
-        </div>
+                        <div class="input-group">
+                            <label for="icCantidad">Cantidad</label>
+                            <input type="number" id="icCantidad" placeholder="Ej: 52">
+                        </div>
 
-        <div class="input-group">
-            <label for="icWO">Orden de Trabajo (WO)</label>
-            <input type="text" id="icWO" placeholder="Ej: 52955177">
-        </div>
+                        <div class="input-group">
+                            <label for="icWO">Orden de Trabajo (WO)</label>
+                            <input type="text" id="icWO" placeholder="Ej: 52955177">
+                        </div>
 
-        <div class="input-group">
-            <label for="icVto">Fecha Vto.</label>
-            <input type="date" id="icVto">
-        </div>
-        
-        </div>
-</div>
+                        <div class="input-group">
+                            <label for="icVto">Fecha Vto.</label>
+                            <input type="date" id="icVto">
+                        </div>
 
-<div id="tabModoImagen" class="tab-content">
-    <div class="alerta-ic" role="alert">
-        Cargue una imagen para imprimirla en la etiqueta. Tamaño recomendado: 300x400px
-    </div>
-    <div class="form-ic-grid">
-        <div class="input-group" style="grid-column: 1 / -1;">
-            <label>Imagen</label>
-            <!-- Input oculto — se activa desde la drop zone y el botón -->
-            <input type="file" id="imagenFile" accept="image/*"
-                   onchange="cargarImagen()" style="display:none;">
-            <!-- Drop zone unificada: click abre el selector, drag o paste también funcionan -->
-            <div id="dropZone" class="drop-zone">
-                <div class="drop-zone-inner">
-                    <span class="drop-zone-icon">🖼️</span>
-                    <p>Arrastrá una imagen, pegá con <kbd>Ctrl+V</kbd><br>
-                       o <span class="drop-zone-link">hacé click para seleccionar</span></p>
+                    </div>
                 </div>
-            </div>
-            <small style="color: var(--text-label); font-size: 0.65rem; margin-top:4px; display:block;">Formatos: JPG, PNG, GIF</small>
-        </div>
 
-        <div class="input-group">
-            <label for="escalaImagen">Escala (%)</label>
-            <input type="range" id="escalaImagen" min="20" max="200" value="100" oninput="actualizarPreviewImagen()" style="width: 100%;">
-            <small id="escalaDisplay" style="color: var(--primary-color); font-size: 0.65rem; display: block; text-align: center;">100%</small>
-        </div>
+                <div id="tabModoImagen" class="tab-content">
+                    <div class="alerta-ic" role="alert">
+                        Cargue una imagen para imprimirla en la etiqueta. Tamaño recomendado: 300x400px
+                    </div>
+                    <div class="form-ic-grid">
+                        <div class="input-group" style="grid-column: 1 / -1;">
+                            <label>Imagen</label>
+                            <!-- Input oculto — se activa desde la drop zone y el botón -->
+                            <input type="file" id="imagenFile" accept="image/*" onchange="cargarImagen()"
+                                style="display:none;">
+                            <!-- Drop zone unificada: click abre el selector, drag o paste también funcionan -->
+                            <div id="dropZone" class="drop-zone">
+                                <div class="drop-zone-inner">
+                                    <span class="drop-zone-icon">🖼️</span>
+                                    <p>Arrastrá una imagen, pegá con <kbd>Ctrl+V</kbd><br>
+                                        o <span class="drop-zone-link">hacé click para seleccionar</span></p>
+                                </div>
+                            </div>
+                            <small
+                                style="color: var(--text-label); font-size: 0.65rem; margin-top:4px; display:block;">Formatos:
+                                JPG, PNG, GIF</small>
+                        </div>
 
-        <div class="input-group">
-            <label for="posicionX">Posición Horizontal</label>
-            <input type="range" id="posicionX" min="0" max="812" value="406" oninput="actualizarPreviewImagen()" style="width: 100%;">
-            <small id="posicionXDisplay" style="color: var(--text-label); font-size: 0.65rem; display: block; text-align: center;">Centro</small>
-        </div>
+                        <div class="input-group">
+                            <label for="escalaImagen">Escala (%)</label>
+                            <input type="range" id="escalaImagen" min="20" max="200" value="100"
+                                oninput="actualizarPreviewImagen()" style="width: 100%;">
+                            <small id="escalaDisplay"
+                                style="color: var(--primary-color); font-size: 0.65rem; display: block; text-align: center;">100%</small>
+                        </div>
 
-        <div class="input-group">
-            <label for="posicionY">Posición Vertical</label>
-            <input type="range" id="posicionY" min="0" max="1218" value="609" oninput="actualizarPreviewImagen()" style="width: 100%;">
-            <small id="posicionYDisplay" style="color: var(--text-label); font-size: 0.65rem; display: block; text-align: center;">Centro</small>
-        </div>
+                        <div class="input-group">
+                            <label for="posicionX">Posición Horizontal</label>
+                            <input type="range" id="posicionX" min="0" max="812" value="406"
+                                oninput="actualizarPreviewImagen()" style="width: 100%;">
+                            <small id="posicionXDisplay"
+                                style="color: var(--text-label); font-size: 0.65rem; display: block; text-align: center;">Centro</small>
+                        </div>
 
-        <div class="input-group">
-            <label for="rotacionImagen">Rotación</label>
-            <select id="rotacionImagen" onchange="actualizarPreviewImagen()">
-                <option value="0">0°</option>
-                <option value="90">90°</option>
-                <option value="180">180°</option>
-                <option value="270">270°</option>
-            </select>
-        </div>
+                        <div class="input-group">
+                            <label for="posicionY">Posición Vertical</label>
+                            <input type="range" id="posicionY" min="0" max="1218" value="609"
+                                oninput="actualizarPreviewImagen()" style="width: 100%;">
+                            <small id="posicionYDisplay"
+                                style="color: var(--text-label); font-size: 0.65rem; display: block; text-align: center;">Centro</small>
+                        </div>
 
-        <div class="input-group" style="grid-column: 1 / -1;">
-            <label for="umbralBinarizacion">Contraste / Umbral de binarización</label>
-            <input type="range" id="umbralBinarizacion" min="50" max="100" value="70"
-                   oninput="onUmbralChange()" style="width:100%;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
-                <small style="color:var(--disabled-text); font-size:0.62rem;">+ Claro</small>
-                <small id="umbralDisplay" style="color:var(--primary-color); font-size:0.68rem; font-weight:bold;">70% — Claro</small>
-                <small style="color:var(--disabled-text); font-size:0.62rem;">+ Oscuro</small>
-            </div>
-        </div>
-    </div>
+                        <div class="input-group">
+                            <label for="rotacionImagen">Rotación</label>
+                            <select id="rotacionImagen" onchange="actualizarPreviewImagen()">
+                                <option value="0">0°</option>
+                                <option value="90">90°</option>
+                                <option value="180">180°</option>
+                                <option value="270">270°</option>
+                            </select>
+                        </div>
 
-    <!-- Preview proporcional 4"×6" (812×1218 dots) — se actualiza en tiempo real -->
-    <div id="previewImagenContainer" style="display:none; margin-top: 20px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-            <small style="font-weight:700; color:var(--text-label); font-size:0.72rem; text-transform:uppercase; letter-spacing:.5px;">Vista Previa (4″×6″)</small>
-            <small id="previewSizeInfo" style="color:var(--disabled-text); font-size:0.68rem;"></small>
-        </div>
-        <div id="previewEtiquetaWrapper" style="
+                        <div class="input-group" style="grid-column: 1 / -1;">
+                            <label for="umbralBinarizacion">Contraste / Umbral de binarización</label>
+                            <input type="range" id="umbralBinarizacion" min="50" max="100" value="70"
+                                oninput="onUmbralChange()" style="width:100%;">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                                <small style="color:var(--disabled-text); font-size:0.62rem;">+ Oscuro</small>
+                                <small id="umbralDisplay"
+                                    style="color:var(--primary-color); font-size:0.68rem; font-weight:bold;">70% —
+                                    Claro</small>
+                                <small style="color:var(--disabled-text); font-size:0.62rem;">+ Claro</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview proporcional 4"×6" (812×1218 dots) — se actualiza en tiempo real -->
+                    <div id="previewImagenContainer" style="display:none; margin-top: 20px;">
+                        <div
+                            style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                            <small
+                                style="font-weight:700; color:var(--text-label); font-size:0.72rem; text-transform:uppercase; letter-spacing:.5px;">Vista
+                                Previa (4″×6″)</small>
+                            <small id="previewSizeInfo" style="color:var(--disabled-text); font-size:0.68rem;"></small>
+                        </div>
+                        <div id="previewEtiquetaWrapper" style="
             position: relative;
             width: 100%;
             max-width: 320px;
@@ -220,79 +258,138 @@
             background: white;
             box-shadow: 0 4px 12px var(--shadow);
         ">
-            <!-- El canvas se crea con JS con aspect-ratio 812/1218 -->
-            <canvas id="previewCanvas" style="display:block; width:100%; height:auto;"></canvas>
-        </div>
-        <small style="display:block; text-align:center; margin-top:6px; color:var(--disabled-text); font-size:0.65rem;">
-            ⚙️ Procesando al soltar el slider...
-        </small>
-    </div>
+                            <!-- El canvas se crea con JS con aspect-ratio 812/1218 -->
+                            <canvas id="previewCanvas" style="display:block; width:100%; height:auto;"></canvas>
+                        </div>
+                        <small
+                            style="display:block; text-align:center; margin-top:6px; color:var(--disabled-text); font-size:0.65rem;">
+                            ⚙️ Procesando al soltar el slider...
+                        </small>
+                    </div>
 
+                </div>
+
+                <div id="tabModoG8" class="tab-content">
+
+                    <div class="form-ic-grid">
+                        <div class="input-group">
+                            <label for="g8Item">Código de Item</label>
+                            <input type="text" id="g8Item" placeholder="Ej: 12345678">
+                        </div>
+                        <div class="input-group">
+                            <label for="g8Cantidad">Cantidad</label>
+                            <input type="number" id="g8Cantidad" placeholder="Ej: 100" min="1">
+                        </div>
+                        <div class="input-group">
+                            <label for="g8Sucursal">Sucursal</label>
+                            <input type="text" id="g8Sucursal" value="03487000" placeholder="03487000">
+                        </div>
+                        <div class="input-group">
+                            <label for="g8Ubicacion">Ubicación</label>
+                            <input type="text" id="g8Ubicacion" placeholder="Ej: A-01-01">
+                        </div>
+                        <div class="input-group">
+                            <label for="g8Lote">Lote</label>
+                            <input type="text" id="g8Lote" placeholder="Ej: 35545957">
+                        </div>
+                        <div class="alerta-ic" role="alert"
+                            style="display: flex; justify-content: space-between; flex-direction: column ;align-items: center;">
+                            <span style="margin-bottom: 10px;">Etiquetas de ubicación para depósito G8.</span>
+                            <button onclick="importarDesdePortapapelesG8()" class="zpl-btn-edit"
+                                style="background: var(--primary-color); color: white; border: none; font-weight: bold;">
+                                📋 IMPORTAR PORTAPAPELES
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+                <div id="status"></div>
+
+                <div class="row" id="controles-extra" style="margin: 10px;">
+                    <div>
+                        <label>TAMAÑO</label>
+                        <select id="tamano" onchange="validar()">
+                            <option value="60">Pequeño</option>
+                            <option value="100" selected>Mediano</option>
+                            <option value="160">Grande</option>
+                            <option value="210">Extra Grande</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>ORIENTACIÓN</label>
+                        <select id="orientacion">
+                            <option value="V">Vertical</option>
+                            <option value="H">Horizontal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="btnImprimir" onclick="imprimir()">IMPRIMIR ETIQUETA</button>
             </div>
-        </div>
-        <div id="status"></div>
 
- <div class="row" id="controles-extra" style="margin: 10px;">
-    <div>
-        <label>TAMAÑO</label>
-        <select id="tamano" onchange="validar()">
-            <option value="60">Pequeño</option>
-            <option value="100" selected>Mediano</option>
-            <option value="160">Grande</option>
-            <option value="210">Extra Grande</option>
-        </select>
-    </div>
-    <div>
-        <label>ORIENTACIÓN</label>
-        <select id="orientacion">
-            <option value="V">Vertical</option>
-            <option value="H">Horizontal</option>
-        </select>
-    </div>
-</div>
+            <div id="modalSeguridad" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <div id="modalContentPassword">
+                        <h2 style="color: var(--primary-color); margin-top: 0;">🔐 Acceso Restringido</h2>
+                        <p>Ingrese la contraseña para habilitar esta impresora:</p>
+                        <input type="password" id="passImpresora" placeholder="Contraseña..."
+                            style="text-align: center; margin-bottom: 20px;">
+                        <div class="row">
+                            <button onclick="validarPassword()" style="flex:1;">INGRESAR</button>
+                            <button class="btn-cancelar" onclick="cancelarSeleccion()"
+                                style="flex:1; margin-top:0;">CANCELAR</button>
+                        </div>
+                    </div>
 
-        <button id="btnImprimir" onclick="imprimir()">IMPRIMIR ETIQUETA</button>
-    </div>
-
-    <div id="modalSeguridad" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div id="modalContentPassword">
-                <h2 style="color: var(--primary-color); margin-top: 0;">🔐 Acceso Restringido</h2>
-                <p>Ingrese la contraseña para habilitar esta impresora:</p>
-                <input type="password" id="passImpresora" placeholder="Contraseña..."
-                    style="text-align: center; margin-bottom: 20px;">
-                <div class="row">
-                    <button onclick="validarPassword()" style="flex:1;">INGRESAR</button>
-                    <button class="btn-cancelar" onclick="cancelarSeleccion()"
-                        style="flex:1; margin-top:0;">CANCELAR</button>
+                    <div id="modalContentAlerta" class="hidden">
+                        <h2 style="color: var(--error-color); margin-top: 0;">⚠️ Seguridad</h2>
+                        <p id="mensajeAlerta"></p>
+                        <button class="btn-cancelar" onclick="cerrarModal()">VOLVER</button>
+                    </div>
                 </div>
             </div>
 
-            <div id="modalContentAlerta" class="hidden">
-                <h2 style="color: var(--error-color); margin-top: 0;">⚠️ Seguridad</h2>
-                <p id="mensajeAlerta"></p>
-                <button class="btn-cancelar" onclick="cerrarModal()">VOLVER</button>
-            </div>
-        </div>
-    </div>
+            <footer>Hecho por Facu - v5.0</footer>
+            <button class="preview-btn" onclick="mostrarPreview()" title="Vista Previa">
+                <span id="eye-icon">👁️</span>
+            </button>
+            <button class="zpl-btn" onclick="mostrarEditorZPL()" title="Ver / Editar ZPL">
+                <span>🦓</span>
+            </button>
 
-    <footer>Hecho por Facu - v4.5</footer>
-    <button class="preview-btn" onclick="mostrarPreview()" title="Vista Previa">
-        <span id="eye-icon">👁️</span>
-    </button>
-
-    <div id="modalPreview" class="modal-overlay hidden">
-        <div class="modal-content preview-content">
-            <h3>VISTA PREVIA</h3>
-            <div id="previewContainer">
-                <div id="previewSpinner" class="preview-spinner hidden" aria-hidden="true"></div>
-                <div id="previewPlaceholder" class="preview-placeholder hidden"></div>
-                <img id="labelaryImage" src="" alt="Cargando etiqueta...">
+            <!-- Modal editor ZPL -->
+            <div id="modalZPL" class="modal-overlay hidden">
+                <div class="modal-content zpl-content">
+                    <div class="zpl-header">
+                        <h3>CÓDIGO ZPL</h3>
+                        <div class="zpl-header-actions">
+                            <span id="zplSizeInfo" style="font-size:0.75rem; color:var(--disabled-text);"></span>
+                            <button class="zpl-btn-edit" id="btnToggleEdit" onclick="toggleEditZPL()" title="Editar">✏️
+                                Editar</button>
+                        </div>
+                    </div>
+                    <textarea id="zplEditor" class="zpl-editor" readonly spellcheck="false"></textarea>
+                    <div class="zpl-footer">
+                        <button onclick="cerrarModalZPL()" class="btn-cancelar"
+                            style="flex:1; margin-top:0;">CERRAR</button>
+                        <button id="btnEnviarZPL" onclick="enviarZPLDesdeEditor()" style="flex:1;">🖨️ ENVIAR
+                            ZPL</button>
+                    </div>
+                </div>
             </div>
-            <button onclick="cerrarPreview()" class="btn-cancelar">CERRAR</button>
-        </div>
-    </div>
-    <script src="app.js"></script>
+
+            <div id="modalPreview" class="modal-overlay hidden">
+                <div class="modal-content preview-content">
+                    <h3>VISTA PREVIA</h3>
+                    <div id="previewContainer">
+                        <div id="previewSpinner" class="preview-spinner hidden" aria-hidden="true"></div>
+                        <div id="previewPlaceholder" class="preview-placeholder hidden"></div>
+                        <img id="labelaryImage" src="" alt="Cargando etiqueta...">
+                    </div>
+                    <button onclick="cerrarPreview()" class="btn-cancelar">CERRAR</button>
+                </div>
+            </div>
+            <script src="app.js"></script>
 </body>
 
 </html>

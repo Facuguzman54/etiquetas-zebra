@@ -6,7 +6,8 @@ const MODO_RESTRINGIDO = false;
 const CONFIG_IMPRESORAS = {
     "10.54.204.171": { nombre: "CONSERVAS", clave: "con2026" },
     "10.54.204.152": { nombre: "PASTA", clave: "pas2026" },
-    "10.54.204.151": { nombre: "ETIQUETADO", clave: "eti2026" }
+    "10.54.204.151": { nombre: "ETIQUETADO", clave: "eti2026" },
+    "10.54.204.153": { nombre: "G8", clave: "" }
 };
 
 let baseDeProductos = {};
@@ -42,7 +43,7 @@ function cambiarTab(evt, nombreTab) {
     if (evt) evt.currentTarget.classList.add("active");
 
     const controlesExtra = document.getElementById('controles-extra');
-    controlesExtra.style.display = (nombreTab === 'tabModoIC' || nombreTab === 'tabModoImagen') ? 'none' : 'flex';
+    controlesExtra.style.display = (nombreTab === 'tabModoIC' || nombreTab === 'tabModoImagen' || nombreTab === 'tabModoG8') ? 'none' : 'flex';
 
     validar();
 }
@@ -93,12 +94,69 @@ function popularDatalistIC() {
    ========================================================================== */
 function verificarPasswordImpresora() {
     const select = document.getElementById('printerIp');
+    const esG8 = select.value === "10.54.204.153";
+    toggleModoG8(esG8);
+    actualizarEstadoImpresora(select.value);
     if (!MODO_RESTRINGIDO) {
         ultimaImpresora = select.value;
         return;
     }
     if (select.value !== "" && select.value !== ultimaImpresora) {
         mostrarModal();
+    }
+}
+
+function actualizarEstadoImpresora(ip) {
+    const dot  = document.getElementById('printerStatusDot');
+    const text = document.getElementById('printerStatusText');
+    if (!dot || !text) return;
+
+    if (!ip) {
+        dot.style.background  = 'var(--disabled-text)';
+        text.textContent      = 'Sin seleccionar';
+        text.style.color      = 'var(--disabled-text)';
+        return;
+    }
+
+    // Estado: verificando
+    dot.style.background = '#f0a500';
+    text.textContent     = 'Verificando...';
+    text.style.color     = '#f0a500';
+
+    fetch(`http://${ip}/`, { method: 'GET', mode: 'no-cors', signal: AbortSignal.timeout(2500) })
+        .then(() => {
+            dot.style.background = '#28a745';
+            text.textContent     = 'En línea';
+            text.style.color     = '#28a745';
+        })
+        .catch(() => {
+            dot.style.background = 'var(--error-color)';
+            text.textContent     = 'Sin respuesta';
+            text.style.color     = 'var(--error-color)';
+        });
+}
+
+/* Muestra/oculta el tab G8 y los tabs normales según la impresora seleccionada */
+function toggleModoG8(activar) {
+    const tabsNormales = document.querySelectorAll('.tab-btn:not(.tab-btn-g8)');
+    const tabG8Btn = document.querySelector('.tab-btn-g8');
+
+    if (activar) {
+        // Ocultar tabs normales
+        tabsNormales.forEach(btn => btn.classList.add('hidden'));
+        tabG8Btn.classList.remove('hidden');
+        // Activar tab G8 programáticamente
+        activarTabProgramaticamente('tabModoG8');
+        tabG8Btn.classList.add('active');
+    } else {
+        // Restaurar tabs normales
+        tabsNormales.forEach(btn => btn.classList.remove('hidden'));
+        tabG8Btn.classList.add('hidden');
+        // Volver al tab por defecto si estábamos en G8
+        if (modoActual === 'tabModoG8') {
+            activarTabProgramaticamente('tabEtiquetaLibre');
+            tabsNormales[0].classList.add('active');
+        }
     }
 }
 
@@ -331,6 +389,18 @@ function generarZPL() {
 ^FT98,1005^BXN,34,200,0,0,1,_,1^FH\\^FD${barcodeData}^FS
 ^FO30,1055^BY3^B2N,95,Y,N,Y^FD${barcodeData} ^FS^BY2
 ^PQ1,0,1,Y^XZ`;
+    }
+
+    if (modoActual === 'tabModoG8') {
+        const codigoItem = document.getElementById('g8Item').value.trim().toUpperCase();
+        const cantidad   = document.getElementById('g8Cantidad').value.trim();
+        const sucursal   = (document.getElementById('g8Sucursal').value.trim() || '03487000').toUpperCase();
+        const ubicacion  = document.getElementById('g8Ubicacion').value.trim().toUpperCase();
+        const lote       = document.getElementById('g8Lote').value.trim();
+
+        if (!codigoItem || !cantidad || !ubicacion) return "";
+
+        return `^XA\n^CI28\n^PW812\n^LL1218\n^FO0,0^GB812,1218,812,B^FS\n^FO550,50^A0B,300,280^FR^FD${ubicacion}^FS\n^FO350,50^A0B,70,60^FR^FD${sucursal}^FS\n^FO350,450^A0B,90,80^FR^FD${cantidad}^FS\n^FO150,50^A0B,80,70^FR^FD${codigoItem}^FS\n^FO150,800^A0B,60,50^FR^FDL: ${lote}^FS\n^XZ`;
     }
     
     if (modoActual === 'tabModoImagen') {
@@ -914,6 +984,99 @@ function cerrarPreview() {
     img.src = "";
 }
 
+/* ==========================================================================
+   MODAL EDITOR ZPL
+   ========================================================================== */
+let zplEditando = false;
+
+function mostrarEditorZPL() {
+    const copias = document.getElementById('copias').value;
+    const zpl = generarZPL();
+
+    if (!zpl || zpl.trim() === '') {
+        alert('No hay contenido para generar ZPL. Complete los campos primero.');
+        return;
+    }
+
+    const zplFinal = zpl.replace('^XZ', `^PQ${copias}^XZ`);
+    const editor = document.getElementById('zplEditor');
+    editor.value = zplFinal;
+    editor.readOnly = true;
+    zplEditando = false;
+
+    const sizeKB = Math.round(zplFinal.length / 1024);
+    const info = document.getElementById('zplSizeInfo');
+    info.innerText = `${zplFinal.length.toLocaleString()} chars · ${sizeKB}KB`;
+    info.style.color = zplFinal.length > 1080000 ? 'var(--error-color)' : 'var(--disabled-text)';
+
+    const btnEdit = document.getElementById('btnToggleEdit');
+    btnEdit.textContent = '✏️ Editar';
+    btnEdit.classList.remove('active');
+
+    document.getElementById('modalZPL').classList.remove('hidden');
+}
+
+function cerrarModalZPL() {
+    zplEditando = false;
+    document.getElementById('zplEditor').readOnly = true;
+    document.getElementById('modalZPL').classList.add('hidden');
+}
+
+function toggleEditZPL() {
+    zplEditando = !zplEditando;
+    const editor = document.getElementById('zplEditor');
+    const btn = document.getElementById('btnToggleEdit');
+
+    editor.readOnly = !zplEditando;
+    if (zplEditando) {
+        btn.textContent = '🔒 Bloquear';
+        btn.classList.add('active');
+        editor.focus();
+        editor.setSelectionRange(0, 0);
+        editor.scrollTop = 0;
+    } else {
+        btn.textContent = '✏️ Editar';
+        btn.classList.remove('active');
+    }
+
+    // Recalcular tamaño con el contenido actual
+    const cur = editor.value;
+    const info = document.getElementById('zplSizeInfo');
+    info.innerText = `${cur.length.toLocaleString()} chars · ${Math.round(cur.length / 1024)}KB`;
+    info.style.color = cur.length > 1080000 ? 'var(--error-color)' : 'var(--disabled-text)';
+}
+
+async function enviarZPLDesdeEditor() {
+    const ip = document.getElementById('printerIp').value;
+    if (!ip) { alert('Seleccione una impresora primero.'); return; }
+
+    const zplFinal = document.getElementById('zplEditor').value.trim();
+    if (!zplFinal) { alert('El editor está vacío.'); return; }
+
+    if (zplFinal.length > 1080000) {
+        alert(`ZPL demasiado grande (${Math.round(zplFinal.length / 1024)}KB). Límite: 1080KB.`);
+        return;
+    }
+
+    const btn = document.getElementById('btnEnviarZPL');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    try {
+        await fetch(`http://${ip}/pstprnt`, { method: 'POST', mode: 'no-cors', body: zplFinal });
+        btn.textContent = '✅ ¡Enviado!';
+        btn.style.background = '#28a745';
+    } catch (e) {
+        btn.textContent = '❌ Error conexión';
+        btn.style.background = 'var(--error-color)';
+    }
+    setTimeout(() => {
+        btn.textContent = '🖨️ ENVIAR ZPL';
+        btn.style.background = '';
+        btn.disabled = false;
+    }, 2500);
+}
+
 async function imprimir() {
     const ip = document.getElementById('printerIp').value;
     const copias = document.getElementById('copias').value;
@@ -926,15 +1089,24 @@ async function imprimir() {
         if (!confirmar) return;
     }
 
+    if (modoActual === 'tabModoG8') {
+        const item = document.getElementById('g8Item').value.trim();
+        const cant = document.getElementById('g8Cantidad').value.trim();
+        const ubic = document.getElementById('g8Ubicacion').value.trim();
+        if (!item || !cant || !ubic) return alert("Completá Código de Item, Cantidad y Ubicación para imprimir.");
+    }
+
     if (modoActual === 'tabModoImagen') {
         if (!imagenActual) return alert("Cargue una imagen antes de imprimir");
     }
 
     let textoHist = modoActual === 'tabEtiquetaLibre' ? 
         document.getElementById('textoEtiqueta').value : 
-        (modoActual === 'tabModoImagen' ? `IMAGEN: ${document.getElementById('imagenFile').value.split('\\').pop()}` : `IC: ${document.getElementById('icItem').value}`);
+        (modoActual === 'tabModoImagen' ? `IMAGEN: ${document.getElementById('imagenFile').value.split('\\').pop()}` :
+        (modoActual === 'tabModoG8' ? `G8: ${document.getElementById('g8Item').value} | ${document.getElementById('g8Ubicacion').value}` :
+        `IC: ${document.getElementById('icItem').value}`));
 
-    const tipoHist = modoActual === 'tabEtiquetaLibre' ? 'ETIQUETA' : (modoActual === 'tabModoImagen' ? 'IMAGEN' : 'IC');
+    const tipoHist = modoActual === 'tabEtiquetaLibre' ? 'ETIQUETA' : (modoActual === 'tabModoImagen' ? 'IMAGEN' : (modoActual === 'tabModoG8' ? 'G8' : 'IC'));
     const datosIC = modoActual === 'tabModoIC'
         ? {
             item: document.getElementById('icItem').value,
@@ -1101,4 +1273,62 @@ function limpiarHistorial() {
         persistirHistorial();
     }
     renderizarHistorial();
+}
+async function importarDesdePortapapelesG8() {
+    const ip = document.getElementById('printerIp').value;
+    if (!ip) return alert("❌ Por favor, selecciona una impresora primero.");
+
+    try {
+        const text = await navigator.clipboard.readText();
+        const data = JSON.parse(text);
+
+        if (!Array.isArray(data)) {
+            alert("❌ El contenido del portapapeles no es un JSON válido.");
+            return;
+        }
+
+        if (!confirm(`Se enviarán ${data.length} etiquetas a la impresora. ¿Continuar?`)) return;
+
+        const sucursal = document.getElementById('g8Sucursal')?.value || '03487000';
+        const copias = document.getElementById('copias')?.value || 1;
+
+        for (const registro of data) {
+            const { codigo, ubicacion } = registro;
+
+            // Parsing del código de 25 dígitos:
+            // 0 (pos 0) | 1014611 (pos 1-7) | 000035642328 (pos 8-19) | 00 (pos 20-21) | 180 (pos 22-24)
+            const codCorto = codigo.substring(1, 8);
+            const lote = codigo.substring(8, 20);
+            const cantidad = parseInt(codigo.substring(22, 25));
+
+            // Extensión del código: añadir 9010 adelante
+            const itemExtendido = "9010" + codCorto;
+
+            // Formato ZPL exacto para Modo G8
+            const zpl = `^XA
+^CI28
+^PW812
+^LL1218
+^FO0,0^GB812,1218,812,B^FS
+^FO550,50^A0B,300,280^FR^FD${ubicacion.toUpperCase()}^FS
+^FO350,50^A0B,70,60^FR^FD${"D: "+sucursal}^FS
+^FO350,450^A0B,90,80^FR^FD${"C: "+cantidad}^FS
+^FO150,50^A0B,80,70^FR^FD${"COD: "+itemExtendido}^FS
+^FO150,800^A0B,60,50^FR^FDL: ${lote}^FS
+^PQ${copias}
+^XZ`;
+
+            // Envío a la Zebra
+            await fetch(`http://${ip}/pstprnt`, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: zpl
+            });
+        }
+
+        alert(`✅ Proceso finalizado: ${data.length} etiquetas enviadas.`);
+    } catch (err) {
+        console.error("Error:", err);
+        alert("❌ Error: Asegurate de copiar el JSON correctamente antes de presionar el botón.");
+    }
 }

@@ -719,3 +719,110 @@ footer {
     text-decoration: underline;
     cursor: pointer;
 }
+
+/* ==========================================================================
+   BOTÓN ZEBRA + MODAL EDITOR ZPL
+   ========================================================================== */
+.zpl-btn {
+    position: fixed;
+    bottom: 90px;        /* justo encima del ojo (que está en bottom:20px + 60px altura) */
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #2d6a2d;
+    color: white;
+    font-size: 24px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 2500;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zpl-btn:hover {
+    transform: scale(1.1);
+    background: #1e4d1e;
+}
+
+/* Modal ZPL */
+.zpl-content {
+    width: 96%;
+    max-width: 600px;
+    height: 88vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 12px;
+}
+
+.zpl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.zpl-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+}
+
+.zpl-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.zpl-btn-edit {
+    width: auto;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    background: var(--bg-section);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
+.zpl-btn-edit:hover { background: var(--bg-body); }
+
+.zpl-btn-edit.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.zpl-editor {
+    flex: 1;
+    width: 100%;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    background: var(--bg-section);
+    color: var(--text-main);
+    resize: none;
+    margin-bottom: 0;
+    transition: border-color 0.2s;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+.zpl-editor:not([readonly]) {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+    background: var(--bg-input);
+}
+
+.zpl-footer {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}

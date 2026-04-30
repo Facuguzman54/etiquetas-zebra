@@ -393,14 +393,28 @@ function generarZPL() {
 
     if (modoActual === 'tabModoG8') {
         const codigoItem = document.getElementById('g8Item').value.trim().toUpperCase();
-        const cantidad   = document.getElementById('g8Cantidad').value.trim();
-        const sucursal   = (document.getElementById('g8Sucursal').value.trim() || '03487000').toUpperCase();
-        const ubicacion  = document.getElementById('g8Ubicacion').value.trim().toUpperCase();
-        const lote       = document.getElementById('g8Lote').value.trim();
+        const valorCantidad = document.getElementById('g8Cantidad').value.trim();
+        const sucursal = (document.getElementById('g8Sucursal').value.trim() || '03487000').toUpperCase();
+        const ubicacion = document.getElementById('g8Ubicacion').value.trim().toUpperCase();
+        const lote = document.getElementById('g8Lote').value.trim();
 
-        if (!codigoItem || !cantidad || !ubicacion) return "";
+        if (!codigoItem || !valorCantidad || !ubicacion) return "";
 
-        return `^XA\n^CI28\n^PW812\n^LL1218\n^FO0,0^GB812,1218,812,B^FS\n^FO550,50^A0B,300,280^FR^FD${ubicacion}^FS\n^FO350,50^A0B,70,60^FR^FD${sucursal}^FS\n^FO350,450^A0B,90,80^FR^FD${cantidad}^FS\n^FO150,50^A0B,80,70^FR^FD${codigoItem}^FS\n^FO150,800^A0B,60,50^FR^FDL: ${lote}^FS\n^XZ`;
+        // Convertimos la cantidad a número y fijamos 6 decimales
+        const cantidadFormateada = parseFloat(valorCantidad).toFixed(6);
+
+        return `^XA
+                ^CI28
+                ^PW812
+                ^LL1218
+                ^FO0,0^GB812,1218,812,B^FS
+                ^FO550,120^A0B,300,280^FR^FD${ubicacion}^FS
+                ^FO350,860^A0B,90,80^FR^FD${sucursal}^FS
+                ^FO350,550^A0B,90,50^FR^FD${cantidadFormateada}^FS
+                ^FO150,50^A0B,90,50^FR^FDL: ${lote}^FS
+                ^FO100,560^A0B,180,120^FR^FD${codigoItem}^FS
+                ^PQ1^PQ1
+                ^XZ`;
     }
     
     if (modoActual === 'tabModoImagen') {

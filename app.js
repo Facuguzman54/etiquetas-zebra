@@ -1309,28 +1309,30 @@ async function importarDesdePortapapelesG8() {
         for (const registro of data) {
             const { codigo, ubicacion } = registro;
 
-            // Parsing del código de 25 dígitos:
-            // 0 (pos 0) | 1014611 (pos 1-7) | 000035642328 (pos 8-19) | 00 (pos 20-21) | 180 (pos 22-24)
+            // Parsing del código de 25 dígitos
             const codCorto = codigo.substring(1, 8);
             const lote = codigo.substring(8, 20);
-            const cantidad = parseInt(codigo.substring(22, 25));
+            
+            // Convertimos a número y formateamos a 6 decimales
+            const cantidadNum = parseInt(codigo.substring(22, 25));
+            const cantidadFormateada = cantidadNum.toFixed(6);
 
             // Extensión del código: añadir 9010 adelante
             const itemExtendido = "9010" + codCorto;
 
-            // Formato ZPL exacto para Modo G8
+            // Formato ZPL exacto (Multilínea y Legible)
             const zpl = `^XA
-^CI28
-^PW812
-^LL1218
-^FO0,0^GB812,1218,812,B^FS
-^FO550,50^A0B,300,280^FR^FD${ubicacion.toUpperCase()}^FS
-^FO350,50^A0B,70,60^FR^FD${"D: "+sucursal}^FS
-^FO350,450^A0B,90,80^FR^FD${"C: "+cantidad}^FS
-^FO150,50^A0B,80,70^FR^FD${"COD: "+itemExtendido}^FS
-^FO150,800^A0B,60,50^FR^FDL: ${lote}^FS
-^PQ${copias}
-^XZ`;
+                ^CI28
+                ^PW812
+                ^LL1218
+                ^FO0,0^GB812,1218,812,B^FS
+                ^FO550,120^A0B,300,280^FR^FD${ubicacion.toUpperCase()}^FS
+                ^FO350,860^A0B,90,80^FR^FD${sucursal}^FS
+                ^FO350,550^A0B,90,50^FR^FD${cantidadFormateada}^FS
+                ^FO150,50^A0B,90,50^FR^FDL: ${lote}^FS
+                ^FO100,560^A0B,180,120^FR^FD${itemExtendido}^FS
+                ^PQ${copias}^PQ${copias}
+                ^XZ`;
 
             // Envío a la Zebra
             await fetch(`http://${ip}/pstprnt`, {

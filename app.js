@@ -1300,7 +1300,9 @@ async function importarDesdePortapapelesG8() {
             alert("❌ El contenido del portapapeles no es un JSON válido.");
             return;
         }
-
+         // --- ESTA ES LA LÍNEA QUE INVIERTE EL ORDEN ---
+        data.reverse(); 
+       
         if (!confirm(`Se enviarán ${data.length} etiquetas a la impresora. ¿Continuar?`)) return;
 
         const sucursal = document.getElementById('g8Sucursal')?.value || '03487000';

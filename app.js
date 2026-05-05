@@ -1328,7 +1328,7 @@ async function importarDesdePortapapelesG8() {
                 ^PW812
                 ^LL1218
                 ^FO0,0^GB812,1218,812,B^FS
-                ^FO550,120^A0B,300,280^FR^FD${ubicacion.toUpperCase()}^FS
+                ^FO550,10^A0B,300,280^FR^FD${ubicacion.toUpperCase()}^FS
                 ^FO350,860^A0B,90,80^FR^FD${sucursal}^FS
                 ^FO350,550^A0B,90,50^FR^FD${cantidadFormateada}^FS
                 ^FO150,50^A0B,90,50^FR^FDL: ${lote}^FS

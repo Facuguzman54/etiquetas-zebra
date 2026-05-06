@@ -7,7 +7,8 @@ const CONFIG_IMPRESORAS = {
     "10.54.204.171": { nombre: "CONSERVAS", clave: "con2026" },
     "10.54.204.152": { nombre: "PASTA", clave: "pas2026" },
     "10.54.204.151": { nombre: "ETIQUETADO", clave: "eti2026" },
-    "10.54.204.153": { nombre: "G8", clave: "" }
+    "10.54.204.153": { nombre: "G8", clave: "" },
+    "10.54.204.150": { nombre: "FEM", clave: "" }
 };
 
 let baseDeProductos = {};

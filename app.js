@@ -17,11 +17,24 @@ let historial = JSON.parse(localStorage.getItem('historial')) || [];
 let modoActual = 'tabEtiquetaLibre';
 let imagenActual = null;
 
+// Estado de control de impresora
+let printerState = {
+    isPaused: false,
+    cancelPressTimeout: null
+};
+
 // Debounce para regenerar GFA escalado solo al soltar el slider
 let _debounceGFA = null;
 function debounceGFA(fn, ms = 400) {
     clearTimeout(_debounceGFA);
     _debounceGFA = setTimeout(fn, ms);
+}
+
+// Debounce para preview inline
+let _debouncePreview = null;
+function debouncePreview(fn, ms = 400) {
+    clearTimeout(_debouncePreview);
+    _debouncePreview = setTimeout(fn, ms);
 }
 
 /* ==========================================================================
@@ -44,7 +57,14 @@ function cambiarTab(evt, nombreTab) {
     if (evt) evt.currentTarget.classList.add("active");
 
     const controlesExtra = document.getElementById('controles-extra');
-    controlesExtra.style.display = (nombreTab === 'tabModoIC' || nombreTab === 'tabModoImagen' || nombreTab === 'tabModoG8') ? 'none' : 'flex';
+    if (controlesExtra) {
+        controlesExtra.style.display = (nombreTab === 'tabModoIC' || nombreTab === 'tabModoImagen' || nombreTab === 'tabModoG8') ? 'none' : 'flex';
+    }
+
+    // Ocultar vista previa inline cuando se cambia de tab
+    if (nombreTab !== 'tabEtiquetaLibre') {
+        ocultarPreviewInline();
+    }
 
     validar();
 }
@@ -73,6 +93,50 @@ window.onload = async () => {
     }
 
     document.getElementById('copias').addEventListener('input', validarSeguridad);
+    
+    // Agregar listeners para actualizar preview cuando cambien tamaño u orientación
+    document.getElementById('tamano').addEventListener('change', () => {
+        if (modoActual === 'tabEtiquetaLibre') {
+            debouncePreview(() => {
+                const zpl = generarZPL();
+                mostrarPreviewInline(zpl);
+            });
+        }
+    });
+    
+    document.getElementById('orientacion').addEventListener('change', () => {
+        if (modoActual === 'tabEtiquetaLibre') {
+            debouncePreview(() => {
+                const zpl = generarZPL();
+                mostrarPreviewInline(zpl);
+            });
+        }
+    });
+    
+    // Agregar listeners para los checkboxes de encabezado y modo negro
+    document.getElementById('chkInversion').addEventListener('change', () => {
+        if (modoActual === 'tabEtiquetaLibre') {
+            debouncePreview(() => {
+                const zpl = generarZPL();
+                mostrarPreviewInline(zpl);
+            });
+        }
+    });
+    
+    // Nota: chkEncabezado ya tiene onchange="toggleEncabezado()" en el HTML
+    // Pero agregamos también aquí para actualizar el preview
+    const chkEncabezado = document.getElementById('chkEncabezado');
+    if (chkEncabezado) {
+        chkEncabezado.addEventListener('change', () => {
+            if (modoActual === 'tabEtiquetaLibre') {
+                debouncePreview(() => {
+                    const zpl = generarZPL();
+                    mostrarPreviewInline(zpl);
+                });
+            }
+        });
+    }
+    
     initDropZone();
     validar();
 };
@@ -249,6 +313,11 @@ function validar() {
             btnImprimir.disabled = true;
             btnImprimir.innerText = 'INGRESE CONTENIDO';
         }
+        // Actualizar preview inline con debounce (espera a que dejes de escribir)
+        debouncePreview(() => {
+            const zpl = generarZPL();
+            mostrarPreviewInline(zpl);
+        });
     } else {
         actualizarFeedbackEtiquetaLibre();
     }
@@ -332,10 +401,7 @@ function generarZPL() {
                 const r = modoInvertido ? "^FR" : "";
 
                 if (orient === 'V') {
-                    zpl += `^FT6,39^A0N,27,38${r}^FDINDUSTRIA ARGENTINA^FS`;
-                    zpl += `^FT428,39^A0N,27,35${r}^FDARCOR S.A.I.C.^FS`;
-                    zpl += `^FT6,96^A0N,38,35${r}^FDPLANTA SAN JUAN^FS`;
-                    zpl += `^FO20,130^A0N,28,28${r}^FD${txt}^FS`;
+                    zpl += `^FO20,20^A0N,28,28${r}^FD${txt}^FS`;
                 } else {
                     zpl += `^FO750,20^A0R,28,28${r}^FD${txt}^FS`;
                 }
@@ -934,6 +1000,13 @@ async function regenerarGFAEscalado(escala, rotacion) {
    ========================================================================== */
 function mostrarPreview() {
     const zpl = generarZPL();
+    
+    // Para modo etiqueta libre, mostrar vista previa inline
+    if (modoActual === 'tabEtiquetaLibre') {
+        return mostrarPreviewInline(zpl);
+    }
+    
+    // Para otros modos, mantener el modal
     const img = document.getElementById('labelaryImage');
     const spinner = document.getElementById('previewSpinner');
     const placeholder = document.getElementById('previewPlaceholder');
@@ -997,6 +1070,160 @@ function cerrarPreview() {
 
     document.getElementById('modalPreview').classList.add('hidden');
     img.src = "";
+}
+
+function mostrarPreviewInline(zpl) {
+    const container = document.getElementById('previewInlineContainer');
+    const img = document.getElementById('labelaryImageInline');
+    const spinner = document.getElementById('previewInlineSpinner');
+    const placeholder = document.getElementById('previewInlinePlaceholder');
+    
+    // Verificar si el textarea está vacío (es la mejor forma de saber si hay contenido real)
+    const textoEtiqueta = document.getElementById('textoEtiqueta').value.trim();
+
+    // Inicializar: ocultar todo excepto placeholder
+    img.classList.add('hidden');
+    spinner.classList.add('hidden');
+    placeholder.classList.add('hidden');
+
+    if (!textoEtiqueta) {
+        placeholder.innerText = 'Escribe contenido en el textarea para ver la vista previa aquí...';
+        placeholder.style.color = 'var(--disabled-text)';
+        placeholder.classList.remove('hidden');
+        container.style.display = 'block';
+        return;
+    }
+
+    // Mostrar spinner mientras carga
+    spinner.classList.remove('hidden');
+    container.style.display = 'block';
+
+    img.onload = () => {
+        spinner.classList.add('hidden');
+        placeholder.classList.add('hidden');
+        img.classList.remove('hidden');
+    };
+    
+    img.onerror = () => {
+        spinner.classList.add('hidden');
+        img.classList.add('hidden');
+        placeholder.innerText = '⚠️ Error al generar preview. Revisa el contenido.';
+        placeholder.style.color = 'var(--error-color)';
+        placeholder.classList.remove('hidden');
+    };
+
+    const url = `http://api.labelary.com/v1/printers/8dpmm/labels/4x6/0/${encodeURIComponent(zpl)}`;
+    img.src = url;
+}
+
+function ocultarPreviewInline() {
+    const container = document.getElementById('previewInlineContainer');
+    const img = document.getElementById('labelaryImageInline');
+    
+    img.onload = null;
+    img.onerror = null;
+    img.src = "";
+    container.style.display = 'none';
+}
+
+/* ==========================================================================
+    CONTROL DE IMPRESORA VIRTUAL
+    ========================================================================== */
+
+function togglePausePlay() {
+    const btn = document.getElementById('btnPausePlay');
+    const printerIp = document.getElementById('printerIp').value;
+    
+    if (!printerIp) {
+        alert('Por favor selecciona una impresora primero');
+        return;
+    }
+    
+    if (printerState.isPaused) {
+        // Reanudar: enviar comando ~PS
+        sendPrinterCommand(printerIp, '~PS');
+        printerState.isPaused = false;
+        btn.classList.remove('playing');
+        btn.innerHTML = '<span class="btn-icon">⏸️</span><span class="btn-label">Pause</span>';
+    } else {
+        // Pausar: enviar comando ~PP
+        sendPrinterCommand(printerIp, '~PP');
+        printerState.isPaused = true;
+        btn.classList.add('playing');
+        btn.innerHTML = '<span class="btn-icon">▶️</span><span class="btn-label">Play</span>';
+    }
+}
+
+function sendFeed() {
+    const printerIp = document.getElementById('printerIp').value;
+    
+    if (!printerIp) {
+        alert('Por favor selecciona una impresora primero');
+        return;
+    }
+    
+    // Enviar comando ~AF
+    sendPrinterCommand(printerIp, '~AF');
+}
+
+function startCancelPress() {
+    const btn = document.getElementById('btnCancel');
+    const printerIp = document.getElementById('printerIp').value;
+    
+    if (!printerIp) {
+        alert('Por favor selecciona una impresora primero');
+        return;
+    }
+    
+    btn.classList.add('holding');
+    
+    // Configurar timeout para 1.5 segundos
+    printerState.cancelPressTimeout = setTimeout(() => {
+        // Mantener presionado 1.5s: Limpiar cola completa (~JA)
+        sendPrinterCommand(printerIp, '~JA');
+        btn.innerHTML = '<span class="btn-icon">✓</span><span class="btn-label">Limpiado</span>';
+        setTimeout(() => {
+            btn.innerHTML = '<span class="btn-icon">⏹️</span><span class="btn-label">Cancel</span>';
+        }, 1000);
+    }, 1500);
+}
+
+function endCancelPress() {
+    const btn = document.getElementById('btnCancel');
+    const printerIp = document.getElementById('printerIp').value;
+    
+    btn.classList.remove('holding');
+    
+    // Si no se llegó a 1.5s, fue un click simple
+    if (printerState.cancelPressTimeout) {
+        clearTimeout(printerState.cancelPressTimeout);
+        printerState.cancelPressTimeout = null;
+        
+        // Click simple: Cancelar solo el trabajo actual (~CA)
+        if (printerIp) {
+            sendPrinterCommand(printerIp, '~CA');
+            btn.innerHTML = '<span class="btn-icon">✓</span><span class="btn-label">Cancelado</span>';
+            setTimeout(() => {
+                btn.innerHTML = '<span class="btn-icon">⏹️</span><span class="btn-label">Cancel</span>';
+            }, 1000);
+        }
+    }
+}
+
+function sendPrinterCommand(printerIp, command) {
+    // Construir el comando de control (sin wrapper ^XA...^XZ)
+    let commandStr = command;
+    
+    // Enviar a la impresora usando el mismo endpoint que las etiquetas
+    fetch(`http://${printerIp}/pstprnt`, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: commandStr
+    })
+    .then(response => {
+        console.log(`Comando ${command} enviado correctamente`);
+    })
+    .catch(error => console.error('Error de conexión:', error));
 }
 
 /* ==========================================================================

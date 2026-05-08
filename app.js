@@ -1162,8 +1162,8 @@ function sendFeed() {
         return;
     }
     
-    // Enviar comando ~AF
-    sendPrinterCommand(printerIp, '~AF');
+    // Enviar ZPL para avanzar una etiqueta
+    sendPrinterCommand(printerIp, '^XA^PH^XZ');
 }
 
 function startCancelPress() {
